@@ -18,7 +18,7 @@ public class Plateau extends BasicGameState{
 			throws SlickException {
 		// TODO Auto-generated method stub
 		
-		this.labyrinthe = new Labyrinthe(11, 11);
+		this.labyrinthe = new Labyrinthe(33, 15);
 		
 	}
 

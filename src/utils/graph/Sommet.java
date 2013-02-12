@@ -98,13 +98,13 @@ public class Sommet {
 			int poid_chemin_fils = -1;
 			
 			if(this.frere != null){
-				System.out.println(this.name + " frère : " + this.frere.getName() + " poid = " + poid_chemin);
+//				System.out.println(this.name + " frère : " + this.frere.getName() + " poid = " + poid_chemin);
 				chemin_frere = this.frere.getPlusPetitCheminRecursif(sommet_final, poid_chemin, false);
 				if(chemin_frere != null) poid_chemin_frere = sommet_final.getValeurSommet();
 			}
 			
 			if(this.fils != null){
-				System.out.println(this.name + " fils : " + this.fils.getName() + " poid = " + (poid_chemin + 1));
+//				System.out.println(this.name + " fils : " + this.fils.getName() + " poid = " + (poid_chemin + 1));
 				chemin_fils = this.fils.getPlusPetitCheminRecursif(sommet_final, poid_chemin + 1, true);
 				if(chemin_fils != null) poid_chemin_fils = sommet_final.getValeurSommet();
 			}
@@ -128,7 +128,7 @@ public class Sommet {
 					}else if(chemin_fils == null && chemin_frere != null){
 						chemin.setFrere(chemin_frere);
 					}else{
-						System.out.println("deux chemins trouvés; poid fils = " + poid_chemin_fils + "; poid frere = " + poid_chemin_frere);
+//						System.out.println("deux chemins trouvés; poid fils = " + poid_chemin_fils + "; poid frere = " + poid_chemin_frere);
 						if(poid_chemin_fils > poid_chemin_frere){
 							chemin.setFrere(chemin_frere);
 						}else{
@@ -149,7 +149,7 @@ public class Sommet {
 					}else if(chemin_fils == null && chemin_frere != null){
 						chemin = chemin_frere;
 					}else{
-						System.out.println("deux chemins trouvés; poid fils = " + poid_chemin_fils + "; poid frere = " + poid_chemin_frere);
+//						System.out.println("deux chemins trouvés; poid fils = " + poid_chemin_fils + "; poid frere = " + poid_chemin_frere);
 						if(poid_chemin_fils > poid_chemin_frere){
 							chemin = chemin_frere;
 						}else{
@@ -160,7 +160,7 @@ public class Sommet {
 				return chemin;
 			}
 		}else{
-			System.out.println("nom: " + this.name + "; poid rejeté = " + poid_chemin + "; " + this.name + ".valeur = " + this.valeur);
+//			System.out.println("nom: " + this.name + "; poid rejeté = " + poid_chemin + "; " + this.name + ".valeur = " + this.valeur);
 		}
 		
 		return null;
