@@ -2,6 +2,7 @@ package jeu.labyrinthe;
 
 import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
+import org.newdawn.slick.SpriteSheet;
 
 import utils.graph.Sommet;
 
@@ -24,56 +25,61 @@ public class Mur extends Sommet{
 	public static final int T_VERS_LE_BAS = 2;
 	public static final int T_VERS_LA_GAUCHE = 3;
 
-	private int pos_x, pos_y;
+	private SpriteSheet textures;
+	
+	private float scale = 1.0f;
+	private int coordonnee_x, coordonnee_y;
+	private int position_x, position_y;
 	private int angle;
 	private int type_mur;
 	
-	private Image im_mur;
-//	private float render_size;
-	private boolean hoover = false;
+//	private boolean hoover = false;
 	private boolean mobile = true;
 	
-	public Mur(int type_mur, int pos_x, int pos_y, int orientation, String name, boolean mobile) throws SlickException{
+	public Mur(int type_mur, int coordonnee_x, int coordonnee_y, int orientation, String name, boolean mobile) throws SlickException{
 	
 		super.setName(name);
 		this.type_mur = type_mur;
-		this.pos_x = pos_x;
-		this.pos_y = pos_y;
+		this.coordonnee_x = coordonnee_x;
+		this.coordonnee_y = coordonnee_y;
 		this.angle = orientation;
 		this.mobile = mobile;
-		String url = "";
-		
-		switch (this.type_mur) {
-		case 0:
-			url = "images/murs/mur_I";
-			break;
-		case 1:
-			url = "images/murs/mur_L";
-			break;
-		case 2:
-			url = "images/murs/mur_T";
-			break;			
-		default:
-			this.type_mur = 0;
-			url = "images/murs/mur_I";
-			break;
-		}
-		
-		url += (!mobile) ? "_im.png" : ".png";
-		this.im_mur = new Image(url).getScaledCopy(20, 20);
+				
+		Image image = new Image("images/murs/murs3D.png");
+		image.setFilter(Image.FILTER_NEAREST);
+		this.textures = new SpriteSheet(image, 64, 74);
+	}
+	
+	public void setCoordonnees(int coordonnee_x, int coordonnee_y){
+	
+		this.coordonnee_x = coordonnee_x;
+		this.coordonnee_y = coordonnee_y;
 		
 	}
 	
-	public int getPosX(){
-		return this.pos_x;
+	public int getCoordonneeX(){
+		return this.coordonnee_x;
 	}
 	
-	public int getPosY(){
-		return this.pos_y;
+	public int getCoordonneeY(){
+		return this.coordonnee_y;
 	}
+	
+	public int getRelativePositionX(){
+		return this.position_x;
+	}
+	
+	public int getRelativePositionY(){
+		return this.position_y;
+	}
+	
 	
 	public int getAngle(){
 		return this.angle;
+	}
+	
+	public void setScale(float scale){
+		this.scale = scale;
 	}
 	
 	public void setRenderSize(float render_size){
@@ -93,15 +99,15 @@ public class Mur extends Sommet{
 		
 	}
 	
-	public void render(float taille){
+	public void render(int posx, int posy, float unix, float uniy){
 
-		this.im_mur.setRotation(this.angle * 90);
-		if(this.hoover){
-			this.im_mur.getScaledCopy(70, 70).draw(this.pos_x * 64 - 3, this.pos_y * 64 - 3);
+		if(this.mobile){
+			this.textures.getSprite(this.angle, this.type_mur).getScaledCopy(unix).draw(this.coordonnee_x * 64 * unix + posx, this.coordonnee_y * 64 * unix + posy);
 		}else{
-			this.im_mur.draw(this.pos_x * 20, this.pos_y * 20);			
+			this.textures.getSprite(this.angle + 8, this.type_mur).getScaledCopy(unix).draw(this.coordonnee_x * 64 * unix + posx, this.coordonnee_y * 64 * unix + posy);
 		}
-
+//		System.out.println(posx + "-" + posy);
+		
 	}
 
 	public void rotateCarte(){
@@ -126,30 +132,6 @@ public class Mur extends Sommet{
 		
 		this.resetConnexions();
 		
-//		System.out.println("pour le mur: " + this.pos_x + "; " + this.pos_y);
-//		
-//		System.out.println("Liste des murs trouvés:");
-//		if(nord != null){
-//			System.out.println("nord  : " + nord.getPosX() + "." + nord.getPosY());
-//		}else{
-//			System.out.println("nord  : null;");
-//		}
-//		if(est != null){
-//			System.out.println("est   : " + est.getPosX() + "." + est.getPosY());
-//		}else{
-//			System.out.println("est   : null;");
-//		}
-//		if(sud != null){
-//			System.out.println("sud   : " + sud.getPosX() + "." + sud.getPosY());
-//		}else{
-//			System.out.println("sud   : null;");
-//		}
-//		if(ouest != null){
-//			System.out.println("ouest : " + ouest.getPosX() + "." + ouest.getPosY());
-//		}else{
-//			System.out.println("ouest : null;");
-//		}
-		
 		Mur[] liste = new Mur[4];
 		liste[0] = nord;
 		liste[1] = est;
@@ -163,11 +145,9 @@ public class Mur extends Sommet{
 			angle_1 = (0 + this.angle) % 4;
 			angle_2 = (2 + this.angle) % 4;
 			if(liste[angle_1] != null) if(liste[angle_1].estConnectable(angle_1)){
-//				System.out.println("connexion " + this.getName() + " -> " + liste[angle_1].getName());
 				this.stack(liste[angle_1]);
 			}
 			if(liste[angle_2] != null) if(liste[angle_2].estConnectable(angle_2)){
-//				System.out.println("connexion " + this.getName() + " -> " + liste[angle_2].getName());
 				this.stack(liste[angle_2]);
 			}
 			break;
@@ -175,11 +155,9 @@ public class Mur extends Sommet{
 			angle_1 = (0 + this.angle) % 4;
 			angle_2 = (1 + this.angle) % 4;
 			if(liste[angle_1] != null) if(liste[angle_1].estConnectable(angle_1)){
-//				System.out.println("connexion " + this.getName() + " -> " + liste[angle_1].getName());
 				this.stack(liste[angle_1]);
 			}
 			if(liste[angle_2] != null) if(liste[angle_2].estConnectable(angle_2)){
-//				System.out.println("connexion " + this.getName() + " -> " + liste[angle_2].getName());
 				this.stack(liste[angle_2]);
 			}
 			break;
@@ -188,15 +166,12 @@ public class Mur extends Sommet{
 			angle_2 = (1 + this.angle) % 4;
 			int angle_3 = (3 + this.angle) % 4;
 			if(liste[angle_1] != null) if(liste[angle_1].estConnectable(angle_1)){
-//				System.out.println("connexion " + this.getName() + " -> " + liste[angle_1].getName());
 				this.stack(liste[angle_1]);
 			}
 			if(liste[angle_2] != null) if(liste[angle_2].estConnectable(angle_2)){
-//				System.out.println("connexion " + this.getName() + " -> " + liste[angle_2].getName());
 				this.stack(liste[angle_2]);
 			}
 			if(liste[angle_3] != null) if(liste[angle_3].estConnectable(angle_3)){
-//				System.out.println("connexion " + this.getName() + " -> " + liste[angle_3].getName());
 				this.stack(liste[angle_3]);
 			}
 			break;
@@ -238,6 +213,10 @@ public class Mur extends Sommet{
 
 	public boolean estMobile() {
 		return this.mobile;
+	}
+
+	public float getScale() {
+		return this.scale;
 	}
 	
 }

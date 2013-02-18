@@ -1,6 +1,5 @@
 package launcher;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import utils.graph.Sommet;

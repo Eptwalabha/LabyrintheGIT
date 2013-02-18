@@ -1,34 +1,32 @@
 package jeu.labyrinthe;
 
-import java.util.ArrayList;
-import java.util.List;
+import jeu.Origine;
 
-import jeu.entitee.joueur.DepartJoueur;
-import jeu.entitee.joueur.Joueur;
-
-import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 
 import utils.graph.Sommet;
 
 public class Labyrinthe {
 
+	public static final int INSERER_DEPUIS_HAUT = 0;
+	public static final int INSERER_DEPUIS_DROITE = 1;
+	public static final int INSERER_DEPUIS_BAS = 2;
+	public static final int INSERER_DEPUIS_GAUCHE = 3;
+
 	private Mur[][] murs;
+	
+	private Origine origine;
 	private int taille_x, taille_y;
-	
-	private List<Joueur> joueurs = new ArrayList<Joueur>();
-	
-	private int joueur_en_cours = 0;
-	
-	public Labyrinthe() throws SlickException{
-		this(7, 7);
+		
+	public Labyrinthe(Origine origine) throws SlickException{
+		this(7, 7, origine);
 	}
 	
-	public Labyrinthe(int taille_x, int taille_y) throws SlickException{
+	public Labyrinthe(int taille_x, int taille_y, Origine origine) throws SlickException{
 		
+		this.origine = origine;
 		if(taille_x < 5) taille_x = 5;
 		if(taille_x % 2 == 0) taille_x++;
 		if(taille_y < 5) taille_y = 5;
@@ -36,24 +34,11 @@ public class Labyrinthe {
 		
 		this.taille_x = taille_x;
 		this.taille_y = taille_y;
-		
+				
 		this.creationLabyrinthe();
-		this.creationGraph();
-		this.creationJoueurPrincipal();
+		this.creationGraphe();
 	}
-	
-	private void creationJoueurPrincipal() throws SlickException {
 		
-		DepartJoueur d = new DepartJoueur(Color.blue, this.murs[0][0]);
-		Joueur j = new Joueur("test", d);
-		this.joueurs.add(j);
-		
-	}
-
-	public void ajouterUnJoueur(Joueur joueur){
-		this.joueurs.add(joueur);
-	}
-	
 	private void creationLabyrinthe() throws SlickException{
 
 		this.murs = new Mur[this.taille_x][this.taille_y];
@@ -79,16 +64,15 @@ public class Labyrinthe {
 					int type = (int) (Math.random() * 2);
 					int orientation = (int) (Math.random() * 4);
 					
-					// à retirer, juste là pour créer plus de chemin.
 					type = Mur.TYPE_T;
 					
 					this.murs[i][j] = new Mur(type, i, j, orientation, i + "." + j, true);
-				}				
+				}
 			}
 		}
 	}
 	
-	private void creationGraph(){
+	private void creationGraphe(){
 		
 		for(int i = 0; i < this.taille_x; i++){
 			for(int j = 0; j < this.taille_y; j++){
@@ -101,6 +85,7 @@ public class Labyrinthe {
 				this.murs[i][j].connecterMurs(nord, est, sud, ouest);
 			}
 		}
+		
 	}
 	
 	public Sommet cheminEntreAEtB(Mur a, Mur b){
@@ -108,79 +93,22 @@ public class Labyrinthe {
 	}
 	
 	public void render(GameContainer gc, Graphics g){
+		
+		int coox = this.origine.getOX();
+		int cooy = this.origine.getOY();
+		float unix = this.origine.getTailleX();
+		float uniy = this.origine.getTailleY();
 		for(int i = 0; i < this.murs.length; i++){
 			for(int j = 0; j < this.murs[i].length; j++){
-				this.murs[i][j].render(10.0f);
+				this.murs[i][j].render(coox, cooy, unix, uniy);
 			}
-		}
-		
-		for(Joueur j : joueurs){
-			j.getDepart().render(gc, g);
-		}
-		
-		for(Joueur j : joueurs){
-			j.render(gc, g);
-		}
-		
-		if(this.joueurs.get(this.joueur_en_cours).seDeplace()){
-			
-			boolean first = true;
-			Sommet curseur = this.joueurs.get(this.joueur_en_cours).getChemin();
-			int oldx = 0, oldy = 0, x, y;
-			do{
-				if(!first){
-					curseur = curseur.getSommetFrere();
-				}
-				x = ((Mur) curseur.getSommetFils()).getPosX() * 20 + 10;
-				y = ((Mur) curseur.getSommetFils()).getPosY() * 20 + 10;
-				
-				if(first){
-					oldx = x;
-					oldy = y;
-					first = false;
-				}
-				
-				g.setColor(Color.blue);
-				g.drawLine(oldx, oldy, x, y);
-				oldx = x;
-				oldy = y;
-			}while (curseur.getSommetFrere() != null);
-			
 		}
 	}
 	
 	public void update(GameContainer gc){
-
-		Input in = gc.getInput();
-		
-		if(in.isMousePressed(Input.MOUSE_LEFT_BUTTON) || in.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON)){
-			int x = (in.getMouseX() / 20 > this.taille_x - 1) ? this.taille_x - 1 : in.getMouseX() / 20;
-			int y = (in.getMouseY() / 20 > this.taille_y - 1) ? this.taille_y - 1 : in.getMouseY() / 20;
-			
-			for(int i = 0; i < this.taille_x; i++){
-				for(int j = 0; j < this.taille_y; j++){
-					this.murs[i][j].resetPassage();
-				}
-			}
-
-			this.joueurs.get(this.joueur_en_cours).goTo(this.murs[x][y]);
-			
-			System.out.println("press (" + x + "." + y + ")" + this.joueurs.get(this.joueur_en_cours).seDeplace());
-		}
-		
-		if(in.isKeyPressed(Input.KEY_SPACE)) this.shakeWall();
-		if(in.isKeyPressed(Input.KEY_ENTER)) this.afficherGraph();
 		
 	}
 	
-	private void afficherGraph() {
-		// TODO Auto-generated method stub
-		if(this.joueurs.get(this.joueur_en_cours).seDeplace()){
-			this.joueurs.get(this.joueur_en_cours).getChemin().printGraph(0, 0);
-		}
-		
-	}
-
 	public void randomMap() throws SlickException{
 		
 		this.creationLabyrinthe();
@@ -189,11 +117,11 @@ public class Labyrinthe {
 				this.murs[i][j].resetPassage();
 			}
 		}
-		this.creationGraph();
+		this.creationGraphe();
 		
 	}
 	
-	private void shakeWall(){
+	public void shakeWall(){
 		
 		for(int i = 0; i < this.taille_x; i++){
 			for(int j = 0; j < this.taille_y; j++){
@@ -206,7 +134,89 @@ public class Labyrinthe {
 				this.murs[i][j].resetPassage();
 			}
 		}
-		this.creationGraph();
+		this.creationGraphe();
 
+	}
+	
+	public Mur insererMur(Mur mur_supplementaire, int mode, int index){
+		
+		if(mode == INSERER_DEPUIS_BAS || mode == INSERER_DEPUIS_HAUT){
+			if(index < this.taille_x && index >= 0){
+				Mur temp = (mode == INSERER_DEPUIS_BAS) ? this.murs[index][0] : this.murs[index][this.taille_y - 1];
+				for(int i = 0; i < this.taille_y; i++){
+					System.out.println("plop");
+					if(mode == INSERER_DEPUIS_BAS){
+						if(i < this.taille_y - 1){
+							this.murs[index][i] = this.murs[index][i + 1];
+							this.murs[index][i].setCoordonnees(index, i);
+						}
+					}else{
+						if(taille_y - 1 - i > 0){
+							this.murs[index][taille_y - 1 - i] = this.murs[index][taille_y - 2 - i];
+							this.murs[index][taille_y - 1 - i].setCoordonnees(index, taille_y - 1 - i);
+						}
+					}
+				}
+				if(mode == INSERER_DEPUIS_BAS){
+					this.murs[index][this.taille_y - 1] = mur_supplementaire;
+					this.murs[index][taille_y - 1].setCoordonnees(index, taille_y - 1);
+				}else{
+					this.murs[index][0] = mur_supplementaire;
+					this.murs[index][0].setCoordonnees(index, 0);
+				}
+				mur_supplementaire = temp;
+			} 
+		}else{
+			if(index < this.taille_y && index >= 0){
+				Mur temp = (mode == INSERER_DEPUIS_DROITE) ? this.murs[0][index] : this.murs[this.taille_x - 1][index];
+				for(int i = 0; i < this.taille_x; i++){
+					if(mode == INSERER_DEPUIS_DROITE){
+						if(i < this.taille_x - 1){
+							this.murs[i][index] = this.murs[i + 1][index];
+							this.murs[i][index].setCoordonnees(i, index);
+						}
+					}else{
+						if(taille_x - 1 - i > 0){
+							this.murs[taille_x - 1 - i][index] = this.murs[taille_x - 2 - i][index];
+							this.murs[taille_x - 1 - i][index].setCoordonnees(taille_x - 1 - i, index);
+						}
+					}
+				}
+				if(mode == INSERER_DEPUIS_DROITE){
+					this.murs[this.taille_y - 1][index] = mur_supplementaire;
+					this.murs[this.taille_y - 1][index].setCoordonnees(this.taille_y - 1, index);
+				}else{
+					this.murs[0][index] = mur_supplementaire;
+					this.murs[0][index].setCoordonnees(0, index);
+				}
+				mur_supplementaire = temp;
+			} 
+		}
+		
+		this.creationGraphe();
+		
+		mur_supplementaire.setCoordonnees(taille_x, 0);
+		return mur_supplementaire;
+	}
+	
+	public Mur getMur(int x, int y){
+		return this.murs[x][y];
+	}
+	
+	public int getTailleX(){
+		return this.taille_x;
+	}
+	
+	public int getTailleY(){
+		return this.taille_y;
+	}
+	
+	public void resetPassageGraphe(){
+		
+		for(int i = 0; i < this.taille_x; i++){
+			for(int j = 0; j < this.taille_y; j++){
+				this.murs[i][j].resetPassage();
+			}
+		}
 	}
 }

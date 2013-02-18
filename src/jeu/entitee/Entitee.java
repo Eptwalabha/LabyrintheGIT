@@ -13,6 +13,8 @@ public abstract class Entitee {
 		this.position = position;
 	}
 	
+	
+	
 	public abstract void render(GameContainer gc, Graphics g);
 	public abstract void update(GameContainer gc);
 	

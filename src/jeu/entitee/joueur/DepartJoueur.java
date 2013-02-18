@@ -19,11 +19,15 @@ public class DepartJoueur extends Entitee {
 	@Override
 	public void render(GameContainer gc, Graphics g) {
 		// TODO Auto-generated method stub
+
+		int x = (int) (this.position.getCoordonneeX() * 64 * this.position.getScale());
+		int y = (int) (this.position.getCoordonneeY() * 64 * this.position.getScale());
+		
 		g.setColor(Color.black);
 		
-		g.drawOval(this.position.getPosX() * 20 + 10, this.position.getPosY() * 20 + 10, 7, 7);
+		g.drawOval(x + 32 - 10, y + 32 - 10, 20, 20);
 		g.setColor(this.couleur);
-		g.drawOval(this.position.getPosX() * 20 + 10, this.position.getPosY() * 20 + 10, 5, 5);
+		g.drawOval(x + 32 - 11, y + 32 - 11, 22, 22);
 	}
 
 	@Override

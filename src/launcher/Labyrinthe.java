@@ -7,8 +7,6 @@ import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.StateBasedGame;
 
-import plateau.Plateau2;
-
 public class Labyrinthe extends StateBasedGame{
 
 	private Plateau jeu;  
@@ -37,8 +35,8 @@ public class Labyrinthe extends StateBasedGame{
 		// TODO Auto-generated method stub
 		try {
 			AppGameContainer app = new AppGameContainer(new Labyrinthe());
-			app.setDisplayMode(800, 800, false);
-			app.setTargetFrameRate(60);
+			app.setDisplayMode(1024, 760, false);
+			app.setTargetFrameRate(120);
 			app.start();
 		} catch (SlickException e) {
 			e.printStackTrace();
