@@ -64,7 +64,7 @@ public class Labyrinthe {
 					int type = (int) (Math.random() * 2);
 					int orientation = (int) (Math.random() * 4);
 					
-					type = Mur.TYPE_T;
+//					type = Mur.TYPE_T;
 					
 					this.murs[i][j] = new Mur(type, i, j, orientation, i + "." + j, true);
 				}
