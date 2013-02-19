@@ -9,7 +9,7 @@ import org.newdawn.slick.state.StateBasedGame;
 
 public class Launcher extends StateBasedGame{
 
-	private Plateau jeu;  
+	private Plateau game;  
 	private AppGameContainer container;  
 
 	public Launcher() {
@@ -23,9 +23,9 @@ public class Launcher extends StateBasedGame{
 			this.container = (AppGameContainer) arg0;  
 		}
 		
-		jeu = new Plateau();
+		game = new Plateau();
 		container.setShowFPS(true);
-		this.addState(jeu);
+		this.addState(game);
 	}
 
 	/**

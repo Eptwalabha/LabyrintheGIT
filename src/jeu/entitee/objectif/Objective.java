@@ -3,12 +3,12 @@ package jeu.entitee.objectif;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 
-import jeu.entitee.Entitee;
-import jeu.labyrinthe.Mur;
+import jeu.entitee.Entity;
+import jeu.labyrinthe.Wall;
 
-public class Objectif extends Entitee {
+public class Objective extends Entity {
 
-	public Objectif(Mur position) {
+	public Objective(Wall position) {
 		super(position);
 		// TODO Auto-generated constructor stub
 	}

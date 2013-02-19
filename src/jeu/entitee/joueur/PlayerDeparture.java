@@ -5,14 +5,14 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 
-import jeu.entitee.Entitee;
-import jeu.labyrinthe.Mur;
+import jeu.entitee.Entity;
+import jeu.labyrinthe.Wall;
 
-public class DepartJoueur extends Entitee {
+public class PlayerDeparture extends Entity {
 
 	private Color couleur;
 	
-	public DepartJoueur(Color couleur, Mur position){
+	public PlayerDeparture(Color couleur, Wall position){
 		super(position);
 	}
 	
@@ -20,8 +20,8 @@ public class DepartJoueur extends Entitee {
 	public void render(GameContainer gc, Graphics g) {
 		// TODO Auto-generated method stub
 
-		int x = (int) (this.position.getCoordonneeX() * 64 * this.position.getScale());
-		int y = (int) (this.position.getCoordonneeY() * 64 * this.position.getScale());
+		int x = (int) (this.position.getCoordinateX() * 64 * this.position.getScale());
+		int y = (int) (this.position.getCoordinateY() * 64 * this.position.getScale());
 		
 		g.setColor(Color.black);
 		
@@ -36,7 +36,7 @@ public class DepartJoueur extends Entitee {
 		
 	}
 
-	public Mur getPosition() {
+	public Wall getPosition() {
 		// TODO Auto-generated method stub
 		return this.position;
 	}
