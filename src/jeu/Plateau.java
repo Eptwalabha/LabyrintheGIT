@@ -27,6 +27,8 @@ public class Plateau extends BasicGameState{
 	
 	private int joueur_en_cours = 0;
 	
+	private Input input;
+	
 	@Override
 	public void init(GameContainer arg0, StateBasedGame arg1)
 			throws SlickException {
@@ -34,6 +36,7 @@ public class Plateau extends BasicGameState{
 		this.labyrinth = new Labyrinth(7, 7, this.origin);
 		this.additionnal_wall = new Wall((int)(Math.random() * 2), 11, 0, (int)(Math.random() * 2), "", true);
 		this.createMainPlayer();
+		this.input = arg0.getInput();
 		
 	}
 
@@ -196,13 +199,24 @@ public class Plateau extends BasicGameState{
 	@Override
 	public void mouseWheelMoved(int move){
 		
-		float scale = this.origin.getSizeX();
-		if(move < 0){
-			this.origin.setOriginUnit(scale - 0.02f, scale - 0.02f);
+		if(move != 0){
+			float scale = this.origin.getSizeX();
+			if(move < 0){
+				this.origin.setOriginUnit(scale - 0.02f, scale - 0.02f);
+			}
+			if(move > 0){
+				this.origin.setOriginUnit(scale + 0.02f, scale + 0.02f);
+			}
+			
+			int mx = this.input.getMouseX();
+			int my = this.input.getMouseY();
+			int x2 = (int) (mx - (mx - this.origin.getOX()) * this.origin.getSizeX() / scale);
+			int y2 = (int) (my - (my - this.origin.getOY()) * this.origin.getSizeY() / scale);
+			
+			this.origin.setOriginPosition(x2, y2);
+			
 		}
-		if(move > 0){
-			this.origin.setOriginUnit(scale + 0.02f, scale + 0.02f);
-		}
+		
 		
 	}
 
