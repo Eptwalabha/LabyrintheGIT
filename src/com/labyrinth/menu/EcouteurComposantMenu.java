@@ -1,4 +1,4 @@
-package menu;
+package com.labyrinth.menu;
 
 public interface EcouteurComposantMenu {
 

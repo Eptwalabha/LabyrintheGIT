@@ -1,4 +1,4 @@
-package menu;
+package com.labyrinth.menu;
 
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;

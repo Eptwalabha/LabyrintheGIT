@@ -1,4 +1,4 @@
-package jeu;
+package com.labyrinth.game;
 
 public class Origin{
 

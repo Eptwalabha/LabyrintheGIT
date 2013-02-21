@@ -1,21 +1,22 @@
-package jeu.entitee.joueur;
+package com.labyrinth.jeu.entitee.joueur;
+
+import com.labyrinth.game.Origin;
+import com.labyrinth.game.maze.Wall;
 
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
 
-import utils.graph.GraphVertice;
+import com.labyrinth.utils.graph.GraphVertex;
 
-import jeu.Origin;
-import jeu.entitee.Entity;
-import jeu.labyrinthe.Wall;
+import com.labyrinth.jeu.entitee.Entity;
 
 public class Player extends Entity{
 
 	private Origin origin;
 	private String name = "<nom du joueur>";
-	private GraphVertice destination = null;
+	private GraphVertex destination = null;
 	private PlayerDeparture departure;
 	
 	private Image im;
@@ -35,6 +36,10 @@ public class Player extends Entity{
 	
 	public Wall getPosition(){
 		return this.position;
+	}
+	
+	public void setPosition(Wall new_position){
+		this.position = new_position;
 	}
 	
 	public PlayerDeparture getDepart(){
@@ -67,7 +72,7 @@ public class Player extends Entity{
 		
 	}
 
-	public GraphVertice getPath() {
+	public GraphVertex getPath() {
 		return this.destination;
 	}
 

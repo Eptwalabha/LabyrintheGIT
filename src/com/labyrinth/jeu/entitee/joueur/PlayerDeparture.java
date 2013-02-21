@@ -1,12 +1,13 @@
-package jeu.entitee.joueur;
+package com.labyrinth.jeu.entitee.joueur;
 
+
+import com.labyrinth.game.maze.Wall;
 
 import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 
-import jeu.entitee.Entity;
-import jeu.labyrinthe.Wall;
+import com.labyrinth.jeu.entitee.Entity;
 
 public class PlayerDeparture extends Entity {
 

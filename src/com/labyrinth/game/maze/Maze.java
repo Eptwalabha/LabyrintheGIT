@@ -1,19 +1,14 @@
-package jeu.labyrinthe;
+package com.labyrinth.game.maze;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.text.html.parser.Entity;
-
-import jeu.Origin;
+import com.labyrinth.game.Origin;
 
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.SlickException;
 
-import utils.graph.GraphVertice;
+import com.labyrinth.utils.graph.GraphVertex;
 
-public class Labyrinth {
+public class Maze {
 
 	public static final int INSERER_DEPUIS_HAUT = 0;
 	public static final int INSERER_DEPUIS_DROITE = 1;
@@ -21,17 +16,15 @@ public class Labyrinth {
 	public static final int INSERER_DEPUIS_GAUCHE = 3;
 
 	private Wall[][] walls;
-	private Wall additional_wall;
-	private List<Entity> entities;
 	
 	private Origin origin;
 	private int nbr_of_collumn, nbr_of_line;
 		
-	public Labyrinth(Origin origin) throws SlickException{
+	public Maze(Origin origin) throws SlickException{
 		this(7, 7, origin);
 	}
 	
-	public Labyrinth(int nbr_of_collumn, int nbr_of_line, Origin origin) throws SlickException{
+	public Maze(int nbr_of_collumn, int nbr_of_line, Origin origin) throws SlickException{
 		
 		this.origin = origin;
 		if(nbr_of_collumn < 5) nbr_of_collumn = 5;
@@ -95,7 +88,7 @@ public class Labyrinth {
 		
 	}
 	
-	public GraphVertice pathBetweenAAndB(Wall a, Wall b){
+	public GraphVertex pathBetweenAAndB(Wall a, Wall b){
 		return a.getShortestPathRecursive(b);
 	}
 	
@@ -226,4 +219,5 @@ public class Labyrinth {
 			}
 		}
 	}
+
 }

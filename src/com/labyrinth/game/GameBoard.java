@@ -1,12 +1,13 @@
-package jeu;
+package com.labyrinth.game;
+
+import com.labyrinth.game.maze.Maze;
+import com.labyrinth.game.maze.Wall;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import jeu.entitee.joueur.PlayerDeparture;
-import jeu.entitee.joueur.Player;
-import jeu.labyrinthe.Labyrinth;
-import jeu.labyrinthe.Wall;
+import com.labyrinth.jeu.entitee.joueur.PlayerDeparture;
+import com.labyrinth.jeu.entitee.joueur.Player;
 
 import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
@@ -16,11 +17,11 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 
-public class Plateau extends BasicGameState{
+public class GameBoard extends BasicGameState{
 
 	private boolean bouton_droit_souris;
 	
-	private Labyrinth labyrinth;
+	private Maze labyrinth;
 	private Wall additionnal_wall;
 	private Origin origin = new Origin();
 	private List<Player> players = new ArrayList<Player>();
@@ -33,7 +34,7 @@ public class Plateau extends BasicGameState{
 	public void init(GameContainer arg0, StateBasedGame arg1)
 			throws SlickException {
 		
-		this.labyrinth = new Labyrinth(7, 7, this.origin);
+		this.labyrinth = new Maze(7, 7, this.origin);
 		this.additionnal_wall = new Wall((int)(Math.random() * 2), 11, 0, (int)(Math.random() * 2), "", true);
 		this.createMainPlayer();
 		this.input = arg0.getInput();
@@ -138,7 +139,13 @@ public class Plateau extends BasicGameState{
 
 		if(in.isKeyPressed(Input.KEY_ENTER)){
 			this.players.get(this.joueur_en_cours).resetPath();
-			this.additionnal_wall = this.labyrinth.insertWall(this.additionnal_wall, Labyrinth.INSERER_DEPUIS_DROITE, 1);
+//			Wall temp = this.labyrinth.insertWall(this.additionnal_wall, Maze.INSERER_DEPUIS_DROITE, 1);
+//			if(this.players.get(this.joueur_en_cours).getPosition() == temp){
+//				this.players.get(this.joueur_en_cours).setPosition(this.additionnal_wall);
+//				this.additionnal_wall = temp;
+//			}
+			
+			this.additionnal_wall = this.labyrinth.insertWall(this.additionnal_wall, Maze.INSERER_DEPUIS_DROITE, 1);
 		}
 
 		if(in.isKeyPressed(Input.KEY_G)) this.printGraph();

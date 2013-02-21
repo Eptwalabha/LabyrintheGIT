@@ -1,12 +1,12 @@
-package jeu.labyrinthe;
+package com.labyrinth.game.maze;
 
 import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.SpriteSheet;
 
-import utils.graph.GraphVertice;
+import com.labyrinth.utils.graph.GraphVertex;
 
-public class Wall extends GraphVertice{
+public class Wall extends GraphVertex{
 
 	public static final int TYPE_I = 0;
 	public static final int TYPE_L = 1;

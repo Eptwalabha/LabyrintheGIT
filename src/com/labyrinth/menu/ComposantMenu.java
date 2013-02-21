@@ -1,4 +1,4 @@
-package menu;
+package com.labyrinth.menu;
 
 import java.util.ArrayList;
 import java.util.List;

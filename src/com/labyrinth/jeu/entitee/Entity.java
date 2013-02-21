@@ -1,6 +1,6 @@
-package jeu.entitee;
+package com.labyrinth.jeu.entitee;
 
-import jeu.labyrinthe.Wall;
+import com.labyrinth.game.maze.Wall;
 
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;

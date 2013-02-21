@@ -1,6 +1,6 @@
-package launcher;
+package com.labyrinth.launcher;
 
-import jeu.Plateau;
+import com.labyrinth.game.GameBoard;
 
 import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.GameContainer;
@@ -9,7 +9,7 @@ import org.newdawn.slick.state.StateBasedGame;
 
 public class Launcher extends StateBasedGame{
 
-	private Plateau game;  
+	private GameBoard game;  
 	private AppGameContainer container;  
 
 	public Launcher() {
@@ -23,7 +23,7 @@ public class Launcher extends StateBasedGame{
 			this.container = (AppGameContainer) arg0;  
 		}
 		
-		game = new Plateau();
+		game = new GameBoard();
 		container.setShowFPS(true);
 		this.addState(game);
 	}
