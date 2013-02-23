@@ -2,6 +2,7 @@ package com.labyrinth.game;
 
 import com.labyrinth.game.maze.Maze;
 import com.labyrinth.game.maze.Wall;
+import com.labyrinth.game.player.PlayerListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,14 +18,15 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 
-public class GameBoard extends BasicGameState{
+public class GameBoard extends BasicGameState implements PlayerListener{
 
 	private boolean bouton_droit_souris;
 	
 	private Maze labyrinth;
-	private Wall additionnal_wall;
+
 	private Origin origin = new Origin();
 	private List<Player> players = new ArrayList<Player>();
+	private List<com.labyrinth.game.player.Player> players2 = new ArrayList<com.labyrinth.game.player.Player>();
 	
 	private int joueur_en_cours = 0;
 	
@@ -35,7 +37,6 @@ public class GameBoard extends BasicGameState{
 			throws SlickException {
 		
 		this.labyrinth = new Maze(7, 7, this.origin);
-		this.additionnal_wall = new Wall((int)(Math.random() * 2), 11, 0, (int)(Math.random() * 2), "", true);
 		this.createMainPlayer();
 		this.input = arg0.getInput();
 		
@@ -45,9 +46,6 @@ public class GameBoard extends BasicGameState{
 	public void render(GameContainer arg0, StateBasedGame arg1, Graphics arg2)
 			throws SlickException {
 		this.labyrinth.render(arg0, arg2);
-		for(Player j : players){
-			j.getDepart().render(arg0, arg2);
-		}
 		
 		for(Player j : players){
 			j.render(arg0, arg2);
@@ -85,7 +83,7 @@ public class GameBoard extends BasicGameState{
 		}
 		*/
 		
-		this.additionnal_wall.render(0, 0, 1.0f, 1.0f);
+		this.labyrinth.getAdditionalWall().render(0, 0, 1.0f, 1.0f);
 		
 
 	}
@@ -132,7 +130,7 @@ public class GameBoard extends BasicGameState{
 		if(in.isKeyPressed(Input.KEY_M)) this.origin.setOriginUnit(this.origin.getSizeX() - taux , this.origin.getSizeX() - taux);
 		
 		if(in.isKeyPressed(Input.KEY_TAB)){
-			this.additionnal_wall.rotateWall();
+			this.labyrinth.rotateAdditionalWall();
 		}
 		
 		if(in.isKeyPressed(Input.KEY_SPACE)) this.labyrinth.shakeWall();
@@ -145,7 +143,7 @@ public class GameBoard extends BasicGameState{
 //				this.additionnal_wall = temp;
 //			}
 			
-			this.additionnal_wall = this.labyrinth.insertWall(this.additionnal_wall, Maze.INSERER_DEPUIS_DROITE, 1);
+			this.labyrinth.insertWallHere(Maze.INSERER_DEPUIS_DROITE, 1);
 		}
 
 		if(in.isKeyPressed(Input.KEY_G)) this.printGraph();
@@ -224,6 +222,40 @@ public class GameBoard extends BasicGameState{
 			
 		}
 		
+		
+	}
+
+	@Override
+	public void playerWantsToPushWall(int mouse_x, int mouse_y, int direction) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void playerWantsToMove(int mouse_x, int mouse_y) {
+		
+		float scale = this.origin.getSizeX(); 
+		int x = (int) ((mouse_x - this.origin.getOX()) / (64 * scale));
+		int y = (int) ((mouse_y - this.origin.getOY()) / (64 * scale));
+		
+		if(x >= 0 && x <= this.labyrinth.getNumberOfCollumn() - 1 && y >= 0 && y <= this.labyrinth.getNumberOfLine() - 1){			
+			this.labyrinth.resetWeightGraph();
+			Wall dest = this.labyrinth.getWall(x, y);
+			
+			this.players2.get(this.joueur_en_cours).setNewDestination(this.players2.get(this.joueur_en_cours).getPosition().getShortestPathRecursive(dest));
+			
+		}
+	}
+
+	@Override
+	public void playerWantsToRotateAdditionalWall() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void playerHasFinishedHisRound() {
+		// TODO Auto-generated method stub
 		
 	}
 

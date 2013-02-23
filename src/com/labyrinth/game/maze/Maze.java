@@ -17,6 +17,8 @@ public class Maze {
 
 	private Wall[][] walls;
 	
+	private Wall additional_wall;
+	
 	private Origin origin;
 	private int nbr_of_collumn, nbr_of_line;
 		
@@ -34,9 +36,12 @@ public class Maze {
 		
 		this.nbr_of_collumn = nbr_of_collumn;
 		this.nbr_of_line = nbr_of_line;
-				
+		
+		this.additional_wall = new Wall((int)(Math.random() * 2), 11, 0, (int)(Math.random() * 2), "", true);
+		
 		this.labyrinthCreation();
 		this.graphCreation();
+		
 	}
 		
 	private void labyrinthCreation() throws SlickException{
@@ -138,7 +143,7 @@ public class Maze {
 
 	}
 	
-	public Wall insertWall(Wall additional_wall, int mode, int index){
+	public void insertWallHere(int mode, int index){
 		
 		if(mode == INSERER_DEPUIS_BAS || mode == INSERER_DEPUIS_HAUT){
 			if(index < this.nbr_of_collumn && index >= 0){
@@ -158,13 +163,13 @@ public class Maze {
 					}
 				}
 				if(mode == INSERER_DEPUIS_BAS){
-					this.walls[index][this.nbr_of_line - 1] = additional_wall;
+					this.walls[index][this.nbr_of_line - 1] = this.additional_wall;
 					this.walls[index][nbr_of_line - 1].setCoordinates(index, nbr_of_line - 1);
 				}else{
-					this.walls[index][0] = additional_wall;
+					this.walls[index][0] = this.additional_wall;
 					this.walls[index][0].setCoordinates(index, 0);
 				}
-				additional_wall = temp;
+				this.additional_wall = temp;
 			} 
 		}else{
 			if(index < this.nbr_of_line && index >= 0){
@@ -183,20 +188,19 @@ public class Maze {
 					}
 				}
 				if(mode == INSERER_DEPUIS_DROITE){
-					this.walls[this.nbr_of_line - 1][index] = additional_wall;
+					this.walls[this.nbr_of_line - 1][index] = this.additional_wall;
 					this.walls[this.nbr_of_line - 1][index].setCoordinates(this.nbr_of_line - 1, index);
 				}else{
-					this.walls[0][index] = additional_wall;
+					this.walls[0][index] = this.additional_wall;
 					this.walls[0][index].setCoordinates(0, index);
 				}
-				additional_wall = temp;
+				this.additional_wall = temp;
 			} 
 		}
 		
 		this.graphCreation();
 		
-		additional_wall.setCoordinates(nbr_of_collumn, 0);
-		return additional_wall;
+		this.additional_wall.setCoordinates(nbr_of_collumn, 0);
 	}
 	
 	public Wall getWall(int x, int y){
@@ -218,6 +222,18 @@ public class Maze {
 				this.walls[i][j].resetVerticeWeight();
 			}
 		}
+	}
+
+	public Wall getAdditionalWall(){
+		return this.additional_wall;
+	}
+	
+	public void rotateAdditionalWall(){
+		this.additional_wall.rotateWall();
+	}
+	
+	public Maze getCopyForAI() throws SlickException{
+		return new Maze(this.origin);
 	}
 
 }

@@ -1,4 +1,4 @@
-package com.labyrinth.game.player;
+package com.labyrinth.objective;
 
 import com.labyrinth.game.maze.Wall;
 

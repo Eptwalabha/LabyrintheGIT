@@ -1,15 +1,13 @@
 package com.labyrinth.game.player;
 
-import com.labyrinth.utils.graph.GraphVertex;
-
 public interface PlayerListener {
 
+	public void playerWantsToPushWall(int mouse_x, int mouse_y, int direction);
 	
-	public boolean moveWall(int line, int column);
+	public void playerWantsToMove(int mouse_x, int mouse_y);
 	
-	public boolean movePlayer(GraphVertex vertex);
+	public void playerWantsToRotateAdditionalWall();
 	
-	public boolean nextPlayer();
-	
+	public void playerHasFinishedHisRound();
 	
 }
