@@ -2,15 +2,18 @@ package com.labyrinth.game;
 
 import com.labyrinth.game.maze.Maze;
 import com.labyrinth.game.maze.Wall;
+import com.labyrinth.game.player.Player;
 import com.labyrinth.game.player.PlayerListener;
+import com.labyrinth.game.player.ai.AIPlayer;
+import com.labyrinth.game.player.human.HumanPlayer;
+import com.labyrinth.gui.SpriteGUI;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.labyrinth.jeu.entitee.joueur.PlayerDeparture;
-import com.labyrinth.jeu.entitee.joueur.Player;
+import com.labyrinth.objective.Objective;
+import com.labyrinth.utils.graph.GraphVertex;
 
-import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
@@ -21,12 +24,12 @@ import org.newdawn.slick.state.StateBasedGame;
 public class GameBoard extends BasicGameState implements PlayerListener{
 
 	private boolean bouton_droit_souris;
+	private SpriteGUI objective_textures;
 	
 	private Maze labyrinth;
 
-	private Origin origin = new Origin();
+	private Origin origin;
 	private List<Player> players = new ArrayList<Player>();
-	private List<com.labyrinth.game.player.Player> players2 = new ArrayList<com.labyrinth.game.player.Player>();
 	
 	private int joueur_en_cours = 0;
 	
@@ -36,8 +39,26 @@ public class GameBoard extends BasicGameState implements PlayerListener{
 	public void init(GameContainer arg0, StateBasedGame arg1)
 			throws SlickException {
 		
-		this.labyrinth = new Maze(7, 7, this.origin);
-		this.createMainPlayer();
+		this.origin = new Origin();
+		SpriteGUI wall_texture = new SpriteGUI("images/murs/wall.png", 12, 4);
+		SpriteGUI player_texture = new SpriteGUI("images/items/player.png", 1, 1);
+		this.objective_textures = new SpriteGUI("images/items/objective.png", 1, 1);
+		
+		this.players = new ArrayList<Player>();		
+		
+		this.labyrinth = new Maze(11, 11, this.origin, wall_texture);
+		
+		Player p1 = new HumanPlayer(0, "test", this.origin, player_texture, this.labyrinth.getWall(0, 0), this);
+		Player p2 = new HumanPlayer(0, "test2", this.origin, player_texture, this.labyrinth.getWall(this.labyrinth.getNumberOfCollumn() - 1, this.labyrinth.getNumberOfLine() - 1), this);
+		Player p3 = new AIPlayer(0, this.origin, player_texture, this.labyrinth.getWall(this.labyrinth.getNumberOfCollumn() - 1, 0), this, this.labyrinth);
+
+		this.players.add(p1);
+		this.players.add(p2);
+		this.players.add(p3);
+		
+		this.joueur_en_cours = 0;
+		
+		this.players.get(this.joueur_en_cours).beginOfRound();
 		this.input = arg0.getInput();
 		
 	}
@@ -50,38 +71,6 @@ public class GameBoard extends BasicGameState implements PlayerListener{
 		for(Player j : players){
 			j.render(arg0, arg2);
 		}
-		
-		/*
-		if(this.joueurs.get(this.joueur_en_cours).seDeplace()){
-			
-			boolean first = true;
-			Sommet curseur = this.joueurs.get(this.joueur_en_cours).getChemin();
-			int oldx = 0, oldy = 0, x, y;
-			float scale = this.origine.getTailleX();
-			int coox = this.origine.getOX();
-			int cooy = this.origine.getOY();
-			do{
-				if(!first){
-					curseur = curseur.getSommetFrere();
-				}
-				
-				x = (int) (coox + ((Mur) curseur.getSommetFils()).getCoordonneeX() * 64 * scale + 64 * scale / 2);
-				y = (int) (cooy + ((Mur) curseur.getSommetFils()).getCoordonneeY() * 64 * scale + 64 * scale / 2);
-				
-				if(first){
-					oldx = x;
-					oldy = y;
-					first = false;
-				}
-				
-				arg2.setColor(Color.blue);
-				arg2.drawLine(oldx, oldy, x, y);
-				oldx = x;
-				oldy = y;
-			}while (curseur.getSommetFrere() != null);
-			
-		}
-		*/
 		
 		this.labyrinth.getAdditionalWall().render(0, 0, 1.0f, 1.0f);
 		
@@ -107,18 +96,11 @@ public class GameBoard extends BasicGameState implements PlayerListener{
 			this.origin.setOriginPosition(this.origin.getOX(), this.origin.getOY() + 5);
 		}
 		
-		if(in.isMousePressed(Input.MOUSE_LEFT_BUTTON) || in.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON)){
-			
-			float scale = this.origin.getSizeX(); 
-			int x = (int) ((in.getMouseX() - this.origin.getOX()) / (64 * scale));
-			int y = (int) ((in.getMouseY() - this.origin.getOY()) / (64 * scale));
-			
-			if(x >= 0 && x <= this.labyrinth.getNumberOfCollumn() - 1 && y >= 0 && y <= this.labyrinth.getNumberOfLine() - 1){			
-				this.labyrinth.resetWeightGraph();
-				this.players.get(this.joueur_en_cours).goTo(this.labyrinth.getWall(x, y));
-			
-			}
+		for(Player p: players){
+			p.update(arg0);
+			if(p.isMoving()) p.move();
 		}
+		
 		if(in.isMouseButtonDown(Input.MOUSE_RIGHT_BUTTON)){
 			
 			
@@ -136,13 +118,7 @@ public class GameBoard extends BasicGameState implements PlayerListener{
 		if(in.isKeyPressed(Input.KEY_SPACE)) this.labyrinth.shakeWall();
 
 		if(in.isKeyPressed(Input.KEY_ENTER)){
-			this.players.get(this.joueur_en_cours).resetPath();
-//			Wall temp = this.labyrinth.insertWall(this.additionnal_wall, Maze.INSERER_DEPUIS_DROITE, 1);
-//			if(this.players.get(this.joueur_en_cours).getPosition() == temp){
-//				this.players.get(this.joueur_en_cours).setPosition(this.additionnal_wall);
-//				this.additionnal_wall = temp;
-//			}
-			
+			this.players.get(this.joueur_en_cours).setNewDestination(null);			
 			this.labyrinth.insertWallHere(Maze.INSERER_DEPUIS_DROITE, 1);
 		}
 
@@ -154,20 +130,8 @@ public class GameBoard extends BasicGameState implements PlayerListener{
 		return 0;
 	}
 
-	private void createMainPlayer() throws SlickException {
-		
-		PlayerDeparture d = new PlayerDeparture(Color.blue, this.labyrinth.getWall(0,0));
-		Player j = new Player("test", d, this.origin);
-		this.players.add(j);
-		
-	}
-
-	public void addPlayer(Player player){
-		this.players.add(player);
-	}
-
 	private void printGraph() {
-		if(this.players.get(this.joueur_en_cours).seDeplace()){
+		if(this.players.get(this.joueur_en_cours).isMoving()){
 			this.players.get(this.joueur_en_cours).getPath().printGraph(0, 0);
 		}
 		
@@ -233,7 +197,7 @@ public class GameBoard extends BasicGameState implements PlayerListener{
 
 	@Override
 	public void playerWantsToMove(int mouse_x, int mouse_y) {
-		
+
 		float scale = this.origin.getSizeX(); 
 		int x = (int) ((mouse_x - this.origin.getOX()) / (64 * scale));
 		int y = (int) ((mouse_y - this.origin.getOY()) / (64 * scale));
@@ -241,22 +205,33 @@ public class GameBoard extends BasicGameState implements PlayerListener{
 		if(x >= 0 && x <= this.labyrinth.getNumberOfCollumn() - 1 && y >= 0 && y <= this.labyrinth.getNumberOfLine() - 1){			
 			this.labyrinth.resetWeightGraph();
 			Wall dest = this.labyrinth.getWall(x, y);
-			
-			this.players2.get(this.joueur_en_cours).setNewDestination(this.players2.get(this.joueur_en_cours).getPosition().getShortestPathRecursive(dest));
-			
+			GraphVertex path = this.players.get(this.joueur_en_cours).getPosition().getShortestPathRecursive(dest);
+			if(path != null){
+				this.players.get(this.joueur_en_cours).setNewDestination(path);
+			}
 		}
 	}
 
 	@Override
 	public void playerWantsToRotateAdditionalWall() {
-		// TODO Auto-generated method stub
-		
+		this.labyrinth.rotateAdditionalWall();
 	}
 
 	@Override
 	public void playerHasFinishedHisRound() {
-		// TODO Auto-generated method stub
 		
+		this.players.get(this.joueur_en_cours).endOfRound();
+		this.joueur_en_cours = (this.joueur_en_cours + 1) % this.players.size() ;
+		this.players.get(this.joueur_en_cours).beginOfRound();
+		
+	}
+
+	@Override
+	public Objective playerWantsNewObjective() {
+		
+		Objective obj = new Objective(this.origin, this.labyrinth.getWall((int)(Math.random() * this.labyrinth.getNumberOfCollumn()), (int)(Math.random() * this.labyrinth.getNumberOfLine())), this.objective_textures);
+		
+		return obj;
 	}
 
 	

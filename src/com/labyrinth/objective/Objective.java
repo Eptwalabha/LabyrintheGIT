@@ -1,24 +1,57 @@
 package com.labyrinth.objective;
 
+import com.labyrinth.game.Origin;
 import com.labyrinth.game.maze.Wall;
+import com.labyrinth.gui.SpriteGUI;
 
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 
 public class Objective {
 
-	public Objective(Wall position) {
-		// TODO Auto-generated constructor stub
+	private Origin origin;
+	private Wall position;
+	private SpriteGUI textures;
+	private int scale;
+	private boolean focus;
+	
+	public Objective(Origin origin, Wall position, SpriteGUI textures) {
+		
+		this.origin = origin;
+		this.position = position;
+		this.textures = textures;
+		
+	}
+	
+	public void active(boolean focus){
+		this.focus = focus;
+		if(!focus) this.scale = 0;
 	}
 
 	public void render(GameContainer gc, Graphics g) {
-		// TODO Auto-generated method stub
+		
+		int x = (int) (this.position.getCoordinateX() * 64 * this.origin.getSizeX() + this.origin.getOX());
+		int y = (int) (this.position.getCoordinateY() * 64 * this.origin.getSizeX() + this.origin.getOY());
+		
+		this.textures.getSpriteAt(0, 0, this.origin.getSizeX() * this.getScale()).draw(x, y);
 		
 	}
 
-	public void update(GameContainer gc) {
-		// TODO Auto-generated method stub
+	private float getScale(){
 		
+		double a = (this.scale * Math.PI) / 180.0;
+		float result = (float) (Math.sin(a) * 0.4f);
+		return (0.8f + result);
+	}
+	
+	public void update() {
+		// TODO Auto-generated method stub
+		if(this.focus){
+			this.scale = (this.scale + 1) % 180;
+		}
 	}
 
+	public Wall getPosition(){
+		return this.position;
+	}
 }

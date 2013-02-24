@@ -1,9 +1,6 @@
 package com.labyrinth.game.maze;
 
-import org.newdawn.slick.Image;
-import org.newdawn.slick.SlickException;
-import org.newdawn.slick.SpriteSheet;
-
+import com.labyrinth.gui.SpriteGUI;
 import com.labyrinth.utils.graph.GraphVertex;
 
 public class Wall extends GraphVertex{
@@ -25,18 +22,18 @@ public class Wall extends GraphVertex{
 	public static final int T_VERS_LE_BAS = 2;
 	public static final int T_VERS_LA_GAUCHE = 3;
 
-	private SpriteSheet textures;
+	private SpriteGUI textures;
 	
 	private float scale = 1.0f;
 	private int coordinates_x, coordinates_y;
-	private int position_x, position_y;
 	private int angle;
 	private int wall_type;
 	
-//	private boolean hoover = false;
 	private boolean pushable = true;
 	
-	public Wall(int type_mur, int coordonnee_x, int coordonnee_y, int orientation, String name, boolean mobile) throws SlickException{
+	public Wall(int type_mur, int coordonnee_x,
+				int coordonnee_y, int orientation,
+				String name, SpriteGUI textures, boolean mobile){
 	
 		super.setName(name);
 		this.wall_type = type_mur;
@@ -44,10 +41,8 @@ public class Wall extends GraphVertex{
 		this.coordinates_y = coordonnee_y;
 		this.angle = orientation;
 		this.pushable = mobile;
-				
-		Image image = new Image("images/murs/murs3D.png");
-		image.setFilter(Image.FILTER_NEAREST);
-		this.textures = new SpriteSheet(image, 64, 74);
+		
+		this.textures = textures;
 	}
 	
 	public void setCoordinates(int coordonnee_x, int coordonnee_y){
@@ -65,17 +60,13 @@ public class Wall extends GraphVertex{
 		return this.coordinates_y;
 	}
 	
-	public int getRelativePositionX(){
-		return this.position_x;
-	}
-	
-	public int getRelativePositionY(){
-		return this.position_y;
-	}
-	
-	
 	public int getAngle(){
 		return this.angle;
+	}
+	
+	public Wall makeCopy(){
+		Wall copy = new Wall(this.wall_type, this.coordinates_x, this.coordinates_y, this.angle, "copy of " + this.getName(), this.textures, this.pushable);
+		return copy;
 	}
 	
 	public void setScale(float scale){
@@ -102,9 +93,9 @@ public class Wall extends GraphVertex{
 	public void render(int posx, int posy, float unix, float uniy){
 
 		if(this.pushable){
-			this.textures.getSprite(this.angle, this.wall_type).getScaledCopy(unix).draw(this.coordinates_x * 64 * unix + posx, this.coordinates_y * 64 * unix + posy);
+			this.textures.getSpriteAt(this.angle, this.wall_type, unix).draw(this.coordinates_x * 64 * unix + posx, this.coordinates_y * 64 * unix + posy);
 		}else{
-			this.textures.getSprite(this.angle + 8, this.wall_type).getScaledCopy(unix).draw(this.coordinates_x * 64 * unix + posx, this.coordinates_y * 64 * unix + posy);
+			this.textures.getSpriteAt(this.angle + 8, this.wall_type, unix).draw(this.coordinates_x * 64 * unix + posx, this.coordinates_y * 64 * unix + posy);
 		}
 //		System.out.println(posx + "-" + posy);
 		

@@ -1,49 +1,57 @@
 package com.labyrinth.game.player.ai;
 
-import java.util.HashMap;
-
 import org.newdawn.slick.GameContainer;
-import org.newdawn.slick.Graphics;
-import org.newdawn.slick.SlickException;
 
 import com.labyrinth.game.Origin;
 import com.labyrinth.game.maze.Maze;
 import com.labyrinth.game.maze.Wall;
 import com.labyrinth.game.player.Player;
 import com.labyrinth.game.player.PlayerListener;
+import com.labyrinth.gui.SpriteGUI;
 
 public class AIPlayer extends Player implements Runnable{
 	
 	private Maze maze;
 	private Maze maze_copy;
 	
-	public AIPlayer(int player_id, Origin origin, Wall start_position, PlayerListener listener, Maze maze) {
-		super(player_id, "cpu " + player_id, origin, start_position, listener);
+	public AIPlayer(int player_id, Origin origin, SpriteGUI textures, Wall start_position, PlayerListener listener, Maze maze) {
+		super(player_id, "cpu " + player_id, origin, textures, start_position, listener);
 		this.maze = maze;
 	}
-
 	
 	public void newRound(){
 		new Thread(this).run();
 	}
 
-
+	@Override
+	public void beginOfRound(){
+		super.beginOfRound();
+		
+		Thread t = new Thread(this);
+		t.start();
+		
+	}
+	
 	@Override
 	public void run() {
 		
-		try {
-			this.maze_copy = this.maze.getCopyForAI();
-		} catch (SlickException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		this.maze_copy = this.maze.getCopyForAI();
 		
-		HashMap<Integer, Integer> result = new HashMap<Integer, Integer>();
+		long time = System.currentTimeMillis();
+		long timet;
+		long next_timet = 1000;
 		
+		do{
+			timet = System.currentTimeMillis() - time;
+			
+			if(timet >= next_timet){
+				System.out.println(timet / 1000);
+				next_timet += 1000;
+			}
+			
+		}while(timet < 5000);
 		
-		
-		
-		
+		this.playerHasFinishedHisRound();
 		
 	}
 
@@ -53,11 +61,6 @@ public class AIPlayer extends Player implements Runnable{
 		
 	}
 	
-	@Override
-	public void render(GameContainer gc, Graphics g) {
-		// TODO Auto-generated method stub
-		
-	}
 
 
 }

@@ -1,6 +1,7 @@
 package com.labyrinth.game.maze;
 
 import com.labyrinth.game.Origin;
+import com.labyrinth.gui.SpriteGUI;
 
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
@@ -16,18 +17,20 @@ public class Maze {
 	public static final int INSERER_DEPUIS_GAUCHE = 3;
 
 	private Wall[][] walls;
-	
 	private Wall additional_wall;
+	
+	private SpriteGUI textures;
 	
 	private Origin origin;
 	private int nbr_of_collumn, nbr_of_line;
 		
-	public Maze(Origin origin) throws SlickException{
-		this(7, 7, origin);
+	public Maze(Origin origin, SpriteGUI textures){
+		this(7, 7, origin, textures);
 	}
 	
-	public Maze(int nbr_of_collumn, int nbr_of_line, Origin origin) throws SlickException{
+	public Maze(int nbr_of_collumn, int nbr_of_line, Origin origin, SpriteGUI textures){
 		
+		this.textures = textures;
 		this.origin = origin;
 		if(nbr_of_collumn < 5) nbr_of_collumn = 5;
 		if(nbr_of_collumn % 2 == 0) nbr_of_collumn++;
@@ -37,14 +40,14 @@ public class Maze {
 		this.nbr_of_collumn = nbr_of_collumn;
 		this.nbr_of_line = nbr_of_line;
 		
-		this.additional_wall = new Wall((int)(Math.random() * 2), 11, 0, (int)(Math.random() * 2), "", true);
+		this.additional_wall = new Wall((int)(Math.random() * 2), 11, 0, (int)(Math.random() * 2), "", this.textures, true);
 		
 		this.labyrinthCreation();
 		this.graphCreation();
 		
 	}
 		
-	private void labyrinthCreation() throws SlickException{
+	private void labyrinthCreation(){
 
 		this.walls = new Wall[this.nbr_of_collumn][this.nbr_of_line];
 				
@@ -53,25 +56,25 @@ public class Maze {
 				
 				if((i % 2 == 0) && (j % 2 == 0)){
 					if(i == 0){
-						if(j == 0) this.walls[i][j] = new Wall(Wall.TYPE_L, i, j, Wall.L_BAS_DROITE, i+"."+j, false);
-						if(j == this.nbr_of_line - 1) this.walls[i][j] = new Wall(Wall.TYPE_L, i, j, Wall.L_HAUT_DROITE, i+"."+j, false);
-						if(j > 0 && j < this.nbr_of_line - 1) this.walls[i][j] = new Wall(Wall.TYPE_T, i, j, Wall.T_VERS_LA_DROITE, i+"."+j, false);
+						if(j == 0) this.walls[i][j] = new Wall(Wall.TYPE_L, i, j, Wall.L_BAS_DROITE, i+"."+j, this.textures, false);
+						if(j == this.nbr_of_line - 1) this.walls[i][j] = new Wall(Wall.TYPE_L, i, j, Wall.L_HAUT_DROITE, i+"."+j, this.textures, false);
+						if(j > 0 && j < this.nbr_of_line - 1) this.walls[i][j] = new Wall(Wall.TYPE_T, i, j, Wall.T_VERS_LA_DROITE, i+"."+j, this.textures, false);
 					}else if(i == this.nbr_of_collumn - 1){
-						if(j == 0) this.walls[i][j] = new Wall(Wall.TYPE_L, i, j, Wall.L_BAS_GAUCHE, i+"."+j, false);
-						if(j == this.nbr_of_line - 1) this.walls[i][j] = new Wall(Wall.TYPE_L, i, j, Wall.L_HAUT_GAUCHE, i+"."+j, false);
-						if(j > 0 && j < this.nbr_of_line - 1) this.walls[i][j] = new Wall(Wall.TYPE_T, i, j, Wall.T_VERS_LA_GAUCHE, i+"."+j, false);
+						if(j == 0) this.walls[i][j] = new Wall(Wall.TYPE_L, i, j, Wall.L_BAS_GAUCHE, i+"."+j, this.textures, false);
+						if(j == this.nbr_of_line - 1) this.walls[i][j] = new Wall(Wall.TYPE_L, i, j, Wall.L_HAUT_GAUCHE, i+"."+j, this.textures, false);
+						if(j > 0 && j < this.nbr_of_line - 1) this.walls[i][j] = new Wall(Wall.TYPE_T, i, j, Wall.T_VERS_LA_GAUCHE, i+"."+j, this.textures, false);
 					}else{
-						if(j == 0) this.walls[i][j] = new Wall(Wall.TYPE_T, i, j, Wall.T_VERS_LE_BAS, i+"."+j, false);
-						if(j == this.nbr_of_line - 1) this.walls[i][j] = new Wall(Wall.TYPE_T, i, j, Wall.T_VERS_LE_HAUT, i+"."+j, false);
-						if(j > 0 && j < this.nbr_of_line - 1) this.walls[i][j] = new Wall(Wall.TYPE_T, i, j, (int)(Math.random() * 4), i+"."+j, false);
+						if(j == 0) this.walls[i][j] = new Wall(Wall.TYPE_T, i, j, Wall.T_VERS_LE_BAS, i+"."+j, this.textures, false);
+						if(j == this.nbr_of_line - 1) this.walls[i][j] = new Wall(Wall.TYPE_T, i, j, Wall.T_VERS_LE_HAUT, i+"."+j, this.textures, false);
+						if(j > 0 && j < this.nbr_of_line - 1) this.walls[i][j] = new Wall(Wall.TYPE_T, i, j, (int)(Math.random() * 4), i+"."+j, this.textures, false);
 					}
 				}else{
 					int type = (int) (Math.random() * 2);
 					int orientation = (int) (Math.random() * 4);
 					
-//					type = Wall.TYPE_T;
+					type = Wall.TYPE_T;
 					
-					this.walls[i][j] = new Wall(type, i, j, orientation, i + "." + j, true);
+					this.walls[i][j] = new Wall(type, i, j, orientation, i + "." + j, this.textures, true);
 				}
 			}
 		}
@@ -232,8 +235,25 @@ public class Maze {
 		this.additional_wall.rotateWall();
 	}
 	
-	public Maze getCopyForAI() throws SlickException{
-		return new Maze(this.origin);
+	public Maze getCopyForAI(){
+		
+		Maze maze = new Maze(this.nbr_of_collumn, this.nbr_of_line, this.origin, this.textures);
+		
+		Wall[][] walls_copy = new Wall[this.nbr_of_collumn][this.nbr_of_line];
+		for(int i = 0; i < this.nbr_of_collumn; i++){
+			for(int j = 0; j < this.nbr_of_line; j++){
+				walls_copy[i][j] = walls[i][j].makeCopy();
+			}
+		}
+		
+		maze.setMaze(walls_copy, this.additional_wall.makeCopy());
+		
+		return maze;
+	}
+
+	public void setMaze(Wall[][] new_walls, Wall new_additional_wall) {
+		this.walls = new_walls;
+		this.additional_wall = new_additional_wall;
 	}
 
 }
