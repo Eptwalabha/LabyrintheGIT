@@ -30,10 +30,10 @@ public class Objective {
 
 	public void render(GameContainer gc, Graphics g) {
 		
-		int x = (int) (this.position.getCoordinateX() * 64 * this.origin.getSizeX() + this.origin.getOX());
-		int y = (int) (this.position.getCoordinateY() * 64 * this.origin.getSizeX() + this.origin.getOY());
+		int x = (int) (this.position.getCoordinateX() * this.origin.getWidth() + this.origin.getOX());
+		int y = (int) (this.position.getCoordinateY() * this.origin.getWidth() + this.origin.getOY());
 		
-		this.textures.getSpriteAt(0, 0, this.origin.getSizeX() * this.getScale()).draw(x, y);
+		this.textures.getSpriteAt(0, 0, (int) (this.origin.getWidth() * this.getScale())).draw(x, y);
 		
 	}
 

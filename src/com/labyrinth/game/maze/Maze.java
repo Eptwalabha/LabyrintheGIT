@@ -104,11 +104,10 @@ public class Maze {
 		
 		int coox = this.origin.getOX();
 		int cooy = this.origin.getOY();
-		float unix = this.origin.getSizeX();
-		float uniy = this.origin.getSizeY();
+		int width = this.origin.getWidth();
 		for(int i = 0; i < this.walls.length; i++){
 			for(int j = 0; j < this.walls[i].length; j++){
-				this.walls[i][j].render(coox, cooy, unix, uniy);
+				this.walls[i][j].render(coox, cooy, width);
 			}
 		}
 	}

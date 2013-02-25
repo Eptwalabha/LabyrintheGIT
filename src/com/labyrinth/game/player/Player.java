@@ -41,8 +41,6 @@ public abstract class Player {
 		
 		this.listeners = new ArrayList<PlayerListener>();
 		this.listeners.add(listener);
-		
-		this.createNewObjective();
 	}
 	
 	public Wall getPosition(){
@@ -76,18 +74,16 @@ public abstract class Player {
 		return this.player_id;
 	}
 	
-	public void createNewObjective(){
-		for(PlayerListener p : listeners){
-			this.player_objetive = p.playerWantsNewObjective();
-		}
-	}
-	
 	public void beginOfRound(){
 		this.player_objetive.active(true);
 	}
 	
 	public void endOfRound(){
 		this.player_objetive.active(false);
+	}
+	
+	public void setPlayerObjective(Objective o){
+		this.player_objetive = o;
 	}
 	
 	public String getPlayerName(){
@@ -101,13 +97,11 @@ public abstract class Player {
 	public void render(GameContainer gc, Graphics g) {
 
 		this.player_objetive.update();
-		this.player_objetive.render(gc, g);
 		
-		int x = (int) (this.position.getCoordinateX() * 64 * this.origin.getSizeX() + this.origin.getOX());
-		int y = (int) (this.position.getCoordinateY() * 64 * this.origin.getSizeX() + this.origin.getOY());
+		int x = (int) (this.position.getCoordinateX() * this.origin.getWidth() + this.origin.getOX());
+		int y = (int) (this.position.getCoordinateY() * this.origin.getWidth() + this.origin.getOY());
 		
-		
-		this.textures.getSpriteAt(0, 0, this.origin.getSizeX()).draw(x, y);
+		this.textures.getSpriteAt(0, 0, this.origin.getWidth()).draw(x, y);
 	}
 	
 	public abstract void update(GameContainer gc);

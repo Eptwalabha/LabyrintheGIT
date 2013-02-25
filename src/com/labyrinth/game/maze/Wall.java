@@ -90,14 +90,13 @@ public class Wall extends GraphVertex{
 		
 	}
 	
-	public void render(int posx, int posy, float unix, float uniy){
+	public void render(int posx, int posy, int width){
 
 		if(this.pushable){
-			this.textures.getSpriteAt(this.angle, this.wall_type, unix).draw(this.coordinates_x * 64 * unix + posx, this.coordinates_y * 64 * unix + posy);
+			this.textures.getSpriteAt(this.angle, this.wall_type, width).draw(this.coordinates_x * width + posx, this.coordinates_y * width + posy);
 		}else{
-			this.textures.getSpriteAt(this.angle + 8, this.wall_type, unix).draw(this.coordinates_x * 64 * unix + posx, this.coordinates_y * 64 * unix + posy);
+			this.textures.getSpriteAt(this.angle + 8, this.wall_type, width).draw(this.coordinates_x * width + posx, this.coordinates_y * width + posy);
 		}
-//		System.out.println(posx + "-" + posy);
 		
 	}
 
