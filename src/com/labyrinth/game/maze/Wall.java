@@ -30,6 +30,7 @@ public class Wall extends GraphVertex{
 	private int wall_type;
 	
 	private boolean pushable = true;
+	private boolean hoover = false;
 	
 	public Wall(int type_mur, int coordonnee_x,
 				int coordonnee_y, int orientation,
@@ -86,18 +87,27 @@ public class Wall extends GraphVertex{
 		return this.wall_type;
 	}
 	
+	public void setHoovered(boolean hoover){
+		this.hoover = hoover;
+	}
+	
 	public void update(int mx, int my){
 		
 	}
 	
-	public void render(int posx, int posy, int width){
+	public void render(int origin_x, int origin_y, int width){
 
-		if(this.pushable){
-			this.textures.getSpriteAt(this.angle, this.wall_type, width).draw(this.coordinates_x * width + posx, this.coordinates_y * width + posy);
+		if(this.hoover){
+			this.textures.getSpriteAt(this.angle + 4, this.wall_type, width).draw(this.coordinates_x * width + origin_x, this.coordinates_y * width + origin_y);
 		}else{
-			this.textures.getSpriteAt(this.angle + 8, this.wall_type, width).draw(this.coordinates_x * width + posx, this.coordinates_y * width + posy);
+			if(this.pushable){
+				this.textures.getSpriteAt(this.angle, this.wall_type, width).draw(this.coordinates_x * width + origin_x, this.coordinates_y * width + origin_y);
+			}else{
+				this.textures.getSpriteAt(this.angle + 8, this.wall_type, width).draw(this.coordinates_x * width + origin_x, this.coordinates_y * width + origin_y);
+			}
 		}
 		
+		this.hoover = false;
 	}
 
 	public void rotateWall(){

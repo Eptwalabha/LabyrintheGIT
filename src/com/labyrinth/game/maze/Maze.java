@@ -15,6 +15,9 @@ public class Maze {
 	public static final int INSERER_DEPUIS_DROITE = 1;
 	public static final int INSERER_DEPUIS_BAS = 2;
 	public static final int INSERER_DEPUIS_GAUCHE = 3;
+	
+	public static final int MODE_CROSS = 0;
+	public static final int MODE_DOT = 1;
 
 	private Wall[][] walls;
 	private Wall additional_wall;
@@ -209,6 +212,18 @@ public class Maze {
 		return this.walls[x][y];
 	}
 	
+	public Wall getWallAt(int mouse_x, int mouse_y){
+		
+		int x = (int) ((mouse_x - this.origin.getOX()) / (this.origin.getWidth()));
+		int y = (int) ((mouse_y - this.origin.getOY()) / (this.origin.getWidth()));
+		
+		if(x >= 0 && x < this.nbr_of_collumn && y >=0 && y < this.nbr_of_line){
+			return this.walls[x][y];
+		}
+		
+		return null;
+	}
+	
 	public int getNumberOfCollumn(){
 		return this.nbr_of_collumn;
 	}
@@ -254,5 +269,32 @@ public class Maze {
 		this.walls = new_walls;
 		this.additional_wall = new_additional_wall;
 	}
+
+	public void hooverAt(int mouse_x, int mouse_y, int mode){
+		
+		int x = (int) ((mouse_x - this.origin.getOX()) / (this.origin.getWidth()));
+		int y = (int) ((mouse_y - this.origin.getOY()) / (this.origin.getWidth()));
+
+		if(mode == Maze.MODE_CROSS){
+			if(x > 0 && x < this.nbr_of_collumn - 1 && x % 2 != 0){
+				for(int i = 0; i < this.nbr_of_line; i++){
+					this.walls[x][i].setHoovered(true);
+				}
+			}
+			if(y > 0 && y < this.nbr_of_line - 1 && y % 2 != 0){
+				for(int i = 0; i < this.nbr_of_collumn; i++){
+					this.walls[i][y].setHoovered(true);
+				}
+			}
+			
+		}else{
+			if(x >= 0 && x < this.nbr_of_collumn && y >=0 && y < this.nbr_of_line){
+				this.walls[x][y].setHoovered(true);
+			}
+		}
+		
+		
+	}
+	
 
 }

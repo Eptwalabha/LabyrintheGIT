@@ -15,6 +15,8 @@ import com.labyrinth.utils.graph.GraphVertex;
 public abstract class Player {
 	
 	protected Wall position;
+	private boolean playing = false;
+	
 	private GraphVertex path;
 	
 	protected SpriteGUI textures;
@@ -75,11 +77,17 @@ public abstract class Player {
 	}
 	
 	public void beginOfRound(){
+		this.playing = true;
 		this.player_objetive.active(true);
 	}
 	
 	public void endOfRound(){
+		this.playing = false;
 		this.player_objetive.active(false);
+	}
+	
+	public boolean isPlaying(){
+		return this.playing;
 	}
 	
 	public void setPlayerObjective(Objective o){

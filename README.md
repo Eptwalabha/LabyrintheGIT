@@ -1,28 +1,28 @@
-# Le fichier lisez-moi du projet...
+﻿# Le fichier lisez-moi du projet...
 
-Labyrinthe:
+# Labyrinthe:
 -----------
 
-# *************************
-# * But du jeu            *
-# *************************
+
+# But du jeu
+-----------
 Les joueurs partent à la découverte d'objets et d'êtres mystérieux, cachés dans un labyrinthe 
 ensorcelé, en déplaçant adroitement les couloirs. 
 Le gagnant est celui qui le premier arrive à éclaircir tous les mystères et à rejoindre le point. 
 de départ. 
 
-# *************************
-# * Préparation           *
-# *************************
+
+# Présentation
+-----------
 Mélanger les cartes «labyrinthe» et les poser sur les cases vides du plan de jeu en formant 
 un dédale. La carte «labyrinthe» en trop sera utilisée au cours du jeu. 
 Mélanger les 24 cartes de trésors, les distribuer équitablement entre les joueurs et les 
 empiler à l'envers devant soi. 
 Choisir un pion et le poser sur la case de couleur identique dans un coin du plan de jeu.
 
-# *************************
-# * Règle du jeu          *
-# *************************
+
+# Règle du jeu
+-----------
 Tirer au sort le joueur commençant la partie, puis jouer dans le sens des aiguilles d'une 
 montre. 
 Le joueur qui commence soulève sa première carte de trésor pour la regarder et la déposer de 
@@ -55,9 +55,9 @@ Si, lors du déplacement d'une carte «labyrinthe», le joueur entraîne le pion
 ou son pion personnel, il doit déposer ce dernier sur la carte rentrée dans le plan de jeu du 
 côté opposé. Le déplacement du pion ne compte pas comme tour de jeu. 
 
-# *************************
-# * Progression des pions *
-# *************************
+
+# Progression des pions
+-----------
  Après avoir déplacé les couloirs du labyrinthe, faire avancer son pion à un endroit 
 quelconque du labyrinthe, relié au point de départ par des couloirs ininterrompus. II est 
 permis d'avancer aussi loin que possible, le nombre de cartes ne jouant aucun rôle. 
@@ -70,9 +70,9 @@ Dès atteinte du but mentionné sur la première carte de trésor, retourner cet
 preuve et la poser à côté de la pile de cartes. Au prochain tour regarder à nouveau la carte 
 suivante de la pile, essayer d'atteindre le but indiqué, retourner la carte et ainsi de suite. 
 
-# *************************
-# * Fin du jeu            *
-# *************************
+
+# Fin du jeu
+-----------
 Après avoir retourné toutes ses cartes de trésors, essayer de ramener son pion dans la case de 
 départ située dans un coin du plan de jeu. Le gagnant est celui qui le premier atteint tous ses 
 buts et ramène son pion au point de départ. 

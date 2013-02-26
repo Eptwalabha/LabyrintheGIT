@@ -47,7 +47,7 @@ public class GameBoard extends BasicGameState implements PlayerListener{
 		this.origin.setWidth(wall_texture.getTileWidth());
 		this.players = new ArrayList<Player>();		
 		
-		this.labyrinth = new Maze(21, 21, this.origin, wall_texture);
+		this.labyrinth = new Maze(7, 7, this.origin, wall_texture);
 		
 		Player p1 = new HumanPlayer(0, "test", this.origin, player_texture, this.labyrinth.getWall(0, 0), this);
 		Player p2 = new HumanPlayer(0, "test2", this.origin, player_texture, this.labyrinth.getWall(this.labyrinth.getNumberOfCollumn() - 1, this.labyrinth.getNumberOfLine() - 1), this);
@@ -108,6 +108,10 @@ public class GameBoard extends BasicGameState implements PlayerListener{
 	@Override
 	public void update(GameContainer arg0, StateBasedGame arg1, int arg2)
 			throws SlickException {
+		
+		Input i = arg0.getInput();
+		this.labyrinth.hooverAt(i.getMouseX(), i.getAbsoluteMouseY(), Maze.MODE_DOT);
+		
 		this.labyrinth.update(arg0);
 		Input in = arg0.getInput();
 		
@@ -164,7 +168,7 @@ public class GameBoard extends BasicGameState implements PlayerListener{
 		}
 		
 	}
-
+	
 	@Override
 	public void mouseDragged(int arg0, int arg1, int arg2, int arg3) {
 		
@@ -226,19 +230,17 @@ public class GameBoard extends BasicGameState implements PlayerListener{
 	@Override
 	public void playerWantsToMove(int mouse_x, int mouse_y) {
 
-		int x = (int) ((mouse_x - this.origin.getOX()) / (this.origin.getWidth()));
-		int y = (int) ((mouse_y - this.origin.getOY()) / (this.origin.getWidth()));
+		Wall dest = this.labyrinth.getWallAt(mouse_x, mouse_y);
 		
-		if(x >= 0 && x <= this.labyrinth.getNumberOfCollumn() - 1 && y >= 0 && y <= this.labyrinth.getNumberOfLine() - 1){			
+		if(dest != null){			
 			this.labyrinth.resetWeightGraph();
-			Wall dest = this.labyrinth.getWall(x, y);
 			GraphVertex path = this.players.get(this.joueur_en_cours).getPosition().getShortestPathRecursive(dest);
 			if(path != null){
 				this.players.get(this.joueur_en_cours).setNewDestination(path);
 			}
 		}
 	}
-
+	
 	@Override
 	public void playerWantsToRotateAdditionalWall() {
 		this.labyrinth.rotateAdditionalWall();
@@ -261,5 +263,4 @@ public class GameBoard extends BasicGameState implements PlayerListener{
 		return obj;
 	}
 
-	
 }

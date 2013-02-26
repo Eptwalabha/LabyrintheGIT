@@ -18,14 +18,17 @@ public class HumanPlayer extends Player {
 
 	@Override
 	public void update(GameContainer gc) {
-		Input i = gc.getInput();
 		
-		if(i.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON)){
-			this.playerWantsToMove(i.getMouseX(), i.getMouseY());
-		}
-		
-		if(i.isKeyPressed(Input.KEY_NUMPAD5)){
-			this.playerHasFinishedHisRound();
+		if(this.isPlaying()){
+			Input i = gc.getInput();
+			
+			if(i.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON)){
+				this.playerWantsToMove(i.getMouseX(), i.getMouseY());
+			}
+			
+			if(i.isKeyPressed(Input.KEY_NUMPAD5)){
+				this.playerHasFinishedHisRound();
+			}
 		}
 	}
 	
