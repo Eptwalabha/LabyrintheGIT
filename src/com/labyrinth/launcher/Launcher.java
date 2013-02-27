@@ -35,7 +35,7 @@ public class Launcher extends StateBasedGame{
 		// TODO Auto-generated method stub
 		try {
 			AppGameContainer app = new AppGameContainer(new Launcher());
-			app.setDisplayMode(1024, 760, false);
+			app.setDisplayMode(1024, 768, false);
 			app.setTargetFrameRate(120);
 			app.start();
 		} catch (SlickException e) {

@@ -1,6 +1,5 @@
 package com.labyrinth.objective;
 
-import com.labyrinth.game.Origin;
 import com.labyrinth.game.maze.Wall;
 import com.labyrinth.gui.SpriteGUI;
 
@@ -9,15 +8,13 @@ import org.newdawn.slick.Graphics;
 
 public class Objective {
 
-	private Origin origin;
 	private Wall position;
 	private SpriteGUI textures;
 	private int scale;
 	private boolean focus;
 	
-	public Objective(Origin origin, Wall position, SpriteGUI textures) {
+	public Objective(Wall position, SpriteGUI textures) {
 		
-		this.origin = origin;
 		this.position = position;
 		this.textures = textures;
 		
@@ -29,11 +26,12 @@ public class Objective {
 	}
 
 	public void render(GameContainer gc, Graphics g) {
+				
+		int x = this.position.getPositionX();
+		int y = this.position.getPositionY();
+		int w = this.position.getWidth();
 		
-		int x = (int) (this.position.getCoordinateX() * this.origin.getWidth() + this.origin.getOX());
-		int y = (int) (this.position.getCoordinateY() * this.origin.getWidth() + this.origin.getOY());
-		
-		this.textures.getSpriteAt(0, 0, (int) (this.origin.getWidth() * this.getScale())).draw(x, y);
+		this.textures.getSpriteAt(0, 0, (int) (w * this.getScale())).draw(x, y);
 		
 	}
 

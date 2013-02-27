@@ -26,6 +26,9 @@ public class Wall extends GraphVertex{
 	
 	private float scale = 1.0f;
 	private int coordinates_x, coordinates_y;
+	private int pos_x = 0, pos_y = 0;
+	private int width = 0;
+	
 	private int angle;
 	private int wall_type;
 	
@@ -61,6 +64,23 @@ public class Wall extends GraphVertex{
 		return this.coordinates_y;
 	}
 	
+	public void setPosition(int x, int y){
+		this.pos_x = x;
+		this.pos_y = y;
+	}
+	
+	public int getPositionX(){
+		return this.pos_x;
+	}
+	
+	public int getPositionY(){
+		return this.pos_y;
+	}
+	
+	public int getWidth(){
+		return this.width;
+	}
+	
 	public int getAngle(){
 		return this.angle;
 	}
@@ -94,22 +114,25 @@ public class Wall extends GraphVertex{
 	public void update(int mx, int my){
 		
 	}
-	
-	public void render(int origin_x, int origin_y, int width){
 
+	public void render(int pos_x, int pos_y, int width){
+
+		this.pos_x = pos_x;
+		this.pos_y = pos_y;
+		this.width = width;
+		
 		if(this.hoover){
-			this.textures.getSpriteAt(this.angle + 4, this.wall_type, width).draw(this.coordinates_x * width + origin_x, this.coordinates_y * width + origin_y);
+			this.textures.getSpriteAt(this.angle + 4, this.wall_type, width).draw(pos_x, pos_y);
 		}else{
 			if(this.pushable){
-				this.textures.getSpriteAt(this.angle, this.wall_type, width).draw(this.coordinates_x * width + origin_x, this.coordinates_y * width + origin_y);
+				this.textures.getSpriteAt(this.angle, this.wall_type, width).draw(pos_x, pos_y);
 			}else{
-				this.textures.getSpriteAt(this.angle + 8, this.wall_type, width).draw(this.coordinates_x * width + origin_x, this.coordinates_y * width + origin_y);
+				this.textures.getSpriteAt(this.angle + 8, this.wall_type, width).draw(pos_x, pos_y);
 			}
 		}
 		
 		this.hoover = false;
 	}
-
 	public void rotateWall(){
 		
 		this.angle = (this.angle + 1) % 4;

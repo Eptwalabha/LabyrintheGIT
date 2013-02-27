@@ -105,9 +105,9 @@ public abstract class Player {
 	public void render(GameContainer gc, Graphics g) {
 
 		this.player_objetive.update();
-		
-		int x = (int) (this.position.getCoordinateX() * this.origin.getWidth() + this.origin.getOX());
-		int y = (int) (this.position.getCoordinateY() * this.origin.getWidth() + this.origin.getOY());
+				
+		int x = this.position.getPositionX();
+		int y = this.position.getPositionY();
 		
 		this.textures.getSpriteAt(0, 0, this.origin.getWidth()).draw(x, y);
 	}
@@ -117,6 +117,12 @@ public abstract class Player {
 	public void playerWantsToMove(int mouse_x, int mouse_y){
 		for(PlayerListener p : listeners){
 			p.playerWantsToMove(mouse_x, mouse_y);
+		}
+	}
+	
+	public void playerWantsToPushWall(int mouse_x, int mouse_y, int direction){
+		for(PlayerListener p : listeners){
+			p.playerWantsToPushWall(mouse_x, mouse_y, direction);
 		}
 	}
 	

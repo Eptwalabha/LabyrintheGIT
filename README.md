@@ -1,6 +1,5 @@
-﻿# Le fichier lisez-moi du projet...
-
-# Labyrinthe:
+﻿# Labyrinthe:
+-----------
 -----------
 
 

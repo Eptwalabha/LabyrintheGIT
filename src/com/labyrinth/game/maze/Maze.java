@@ -11,10 +11,11 @@ import com.labyrinth.utils.graph.GraphVertex;
 
 public class Maze {
 
-	public static final int INSERER_DEPUIS_HAUT = 0;
-	public static final int INSERER_DEPUIS_DROITE = 1;
-	public static final int INSERER_DEPUIS_BAS = 2;
-	public static final int INSERER_DEPUIS_GAUCHE = 3;
+	public static final int INSERT_FROM_BOTTOM = 0;
+	public static final int INSERT_FROM_LEFT = 1;
+	public static final int INSERT_FROM_TOP = 2;
+	public static final int INSERT_FROM_RIGHT = 3;
+
 	
 	public static final int MODE_CROSS = 0;
 	public static final int MODE_DOT = 1;
@@ -26,6 +27,11 @@ public class Maze {
 	
 	private Origin origin;
 	private int nbr_of_collumn, nbr_of_line;
+	
+	private boolean wall_moving = false;
+	private int wall_moving_direction = -1;
+	private int wall_moving_index;
+	private long wall_moving_start_time;
 		
 	public Maze(Origin origin, SpriteGUI textures){
 		this(7, 7, origin, textures);
@@ -75,7 +81,7 @@ public class Maze {
 					int type = (int) (Math.random() * 2);
 					int orientation = (int) (Math.random() * 4);
 					
-					type = Wall.TYPE_T;
+//					type = Wall.TYPE_T;
 					
 					this.walls[i][j] = new Wall(type, i, j, orientation, i + "." + j, this.textures, true);
 				}
@@ -107,11 +113,64 @@ public class Maze {
 		
 		int coox = this.origin.getOX();
 		int cooy = this.origin.getOY();
+		int pos_x, pos_y;
+		int move_x = 0;
+		int move_y = 0;
 		int width = this.origin.getWidth();
-		for(int i = 0; i < this.walls.length; i++){
-			for(int j = 0; j < this.walls[i].length; j++){
-				this.walls[i][j].render(coox, cooy, width);
+		
+		if(this.wall_moving){
+			int dist = (int) ((((this.wall_moving_start_time + 1100) - System.currentTimeMillis()) / 1000f) * width);
+			if(dist > width) dist = width;
+			switch (this.wall_moving_direction) {
+			case 0:
+				move_y = 0 - dist;
+				break;
+			case 1:
+				move_x = dist;
+				break;
+			case 2:
+				move_y = dist;
+				break;
+			case 3:
+				move_x = 0 - dist;
+				break;
 			}
+		}
+
+		if(!this.wall_moving || this.wall_moving_direction == 0 || this.wall_moving_direction == 2){
+			for(int i = 0; i < this.walls.length; i++){
+				for(int j = 0; j < this.walls[i].length; j++){
+					
+					pos_x = i * width + coox;
+					pos_y = j * width + cooy;
+					
+					if(this.wall_moving && this.wall_moving_index == i){
+						this.walls[i][j].render((int) (pos_x - move_x + (5 - Math.random() * 10)), (int) (pos_y - move_y + (2 - Math.random() * 4)), width);
+					}else{
+						this.walls[i][j].render(pos_x, pos_y, width);
+					}
+				}
+			}
+		}else{
+			
+			for(int j = 0; j < this.walls[0].length; j++){
+				for(int i = 0; i < this.walls.length; i++){
+					
+					pos_x = i * width + coox;
+					pos_y = j * width + cooy;
+					
+					if(this.wall_moving_index == j){
+						this.walls[i][j].render((int) (pos_x - move_x + (5 - Math.random() * 10)), (int) (pos_y - move_y + (2 - Math.random() * 4)), width);
+					}else{
+						this.walls[i][j].render(pos_x, pos_y, width);
+					}
+				}
+			}
+
+		}
+		
+		if((this.wall_moving_start_time + 1100) - System.currentTimeMillis() <= 0){
+			this.wall_moving = false;
 		}
 	}
 	
@@ -148,58 +207,68 @@ public class Maze {
 
 	}
 	
-	public void insertWallHere(int mode, int index){
+	public void insertWallHere(int mouse_x, int mouse_y, int mode){
 		
-		if(mode == INSERER_DEPUIS_BAS || mode == INSERER_DEPUIS_HAUT){
-			if(index < this.nbr_of_collumn && index >= 0){
-				Wall temp = (mode == INSERER_DEPUIS_BAS) ? this.walls[index][0] : this.walls[index][this.nbr_of_line - 1];
+		int coll = (int) ((mouse_x - this.origin.getOX()) / (this.origin.getWidth()));
+		int line = (int) ((mouse_y - this.origin.getOY()) / (this.origin.getWidth()));
+		
+		if(mode == INSERT_FROM_BOTTOM || mode == INSERT_FROM_TOP){
+			if(coll < this.nbr_of_collumn && coll >= 0 && coll % 2 != 0){
+				Wall temp = (mode == INSERT_FROM_BOTTOM) ? this.walls[coll][0] : this.walls[coll][this.nbr_of_line - 1];
 				for(int i = 0; i < this.nbr_of_line; i++){
-					System.out.println("plop");
-					if(mode == INSERER_DEPUIS_BAS){
+					if(mode == INSERT_FROM_BOTTOM){
 						if(i < this.nbr_of_line - 1){
-							this.walls[index][i] = this.walls[index][i + 1];
-							this.walls[index][i].setCoordinates(index, i);
+							this.walls[coll][i] = this.walls[coll][i + 1];
+							this.walls[coll][i].setCoordinates(coll, i);
 						}
 					}else{
 						if(nbr_of_line - 1 - i > 0){
-							this.walls[index][nbr_of_line - 1 - i] = this.walls[index][nbr_of_line - 2 - i];
-							this.walls[index][nbr_of_line - 1 - i].setCoordinates(index, nbr_of_line - 1 - i);
+							this.walls[coll][nbr_of_line - 1 - i] = this.walls[coll][nbr_of_line - 2 - i];
+							this.walls[coll][nbr_of_line - 1 - i].setCoordinates(coll, nbr_of_line - 1 - i);
 						}
 					}
 				}
-				if(mode == INSERER_DEPUIS_BAS){
-					this.walls[index][this.nbr_of_line - 1] = this.additional_wall;
-					this.walls[index][nbr_of_line - 1].setCoordinates(index, nbr_of_line - 1);
+				if(mode == INSERT_FROM_BOTTOM){
+					this.walls[coll][this.nbr_of_line - 1] = this.additional_wall;
+					this.walls[coll][nbr_of_line - 1].setCoordinates(coll, nbr_of_line - 1);
 				}else{
-					this.walls[index][0] = this.additional_wall;
-					this.walls[index][0].setCoordinates(index, 0);
+					this.walls[coll][0] = this.additional_wall;
+					this.walls[coll][0].setCoordinates(coll, 0);
 				}
 				this.additional_wall = temp;
+				this.wall_moving = true;
+				this.wall_moving_start_time = System.currentTimeMillis();
+				this.wall_moving_direction = mode;
+				this.wall_moving_index = coll;
 			} 
 		}else{
-			if(index < this.nbr_of_line && index >= 0){
-				Wall temp = (mode == INSERER_DEPUIS_DROITE) ? this.walls[0][index] : this.walls[this.nbr_of_collumn - 1][index];
+			if(line < this.nbr_of_line && line >= 0  && line % 2 != 0){
+				Wall temp = (mode == INSERT_FROM_RIGHT) ? this.walls[0][line] : this.walls[this.nbr_of_collumn - 1][line];
 				for(int i = 0; i < this.nbr_of_collumn; i++){
-					if(mode == INSERER_DEPUIS_DROITE){
+					if(mode == INSERT_FROM_RIGHT){
 						if(i < this.nbr_of_collumn - 1){
-							this.walls[i][index] = this.walls[i + 1][index];
-							this.walls[i][index].setCoordinates(i, index);
+							this.walls[i][line] = this.walls[i + 1][line];
+							this.walls[i][line].setCoordinates(i, line);
 						}
 					}else{
 						if(nbr_of_collumn - 1 - i > 0){
-							this.walls[nbr_of_collumn - 1 - i][index] = this.walls[nbr_of_collumn - 2 - i][index];
-							this.walls[nbr_of_collumn - 1 - i][index].setCoordinates(nbr_of_collumn - 1 - i, index);
+							this.walls[nbr_of_collumn - 1 - i][line] = this.walls[nbr_of_collumn - 2 - i][line];
+							this.walls[nbr_of_collumn - 1 - i][line].setCoordinates(nbr_of_collumn - 1 - i, line);
 						}
 					}
 				}
-				if(mode == INSERER_DEPUIS_DROITE){
-					this.walls[this.nbr_of_line - 1][index] = this.additional_wall;
-					this.walls[this.nbr_of_line - 1][index].setCoordinates(this.nbr_of_line - 1, index);
+				if(mode == INSERT_FROM_RIGHT){
+					this.walls[this.nbr_of_line - 1][line] = this.additional_wall;
+					this.walls[this.nbr_of_line - 1][line].setCoordinates(this.nbr_of_line - 1, line);
 				}else{
-					this.walls[0][index] = this.additional_wall;
-					this.walls[0][index].setCoordinates(0, index);
+					this.walls[0][line] = this.additional_wall;
+					this.walls[0][line].setCoordinates(0, line);
 				}
 				this.additional_wall = temp;
+				this.wall_moving = true;
+				this.wall_moving_start_time = System.currentTimeMillis();
+				this.wall_moving_direction = mode;
+				this.wall_moving_index = line;
 			} 
 		}
 		
