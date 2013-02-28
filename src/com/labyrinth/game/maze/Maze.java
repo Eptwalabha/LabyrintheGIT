@@ -314,8 +314,8 @@ public class Maze {
 		return this.additional_wall;
 	}
 	
-	public void rotateAdditionalWall(){
-		this.additional_wall.rotateWall();
+	public void rotateAdditionalWall(int mode){
+		this.additional_wall.rotateWall(mode);
 	}
 	
 	public Maze getCopyForAI(){

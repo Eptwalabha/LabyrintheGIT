@@ -71,6 +71,10 @@ public class SpriteGUI {
 		return image;
 	}
 
+	public Image getSpriteAt(int x, int y, int width, int height){
+		return this.sprites.getSprite(x, y).getScaledCopy(width, height);		
+	}
+
 	public int getTileWidth(){
 		return this.tile_width;
 	}

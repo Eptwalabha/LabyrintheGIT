@@ -21,6 +21,9 @@ public class HumanPlayer extends Player {
 	}
 
 
+	/**
+	 * Les bouttons by passe le GameContainer!!!!!!
+	 */
 	@Override
 	public void update(GameContainer gc) {
 		

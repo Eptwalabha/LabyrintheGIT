@@ -8,7 +8,7 @@ public interface PlayerListener {
 	
 	public void playerWantsToMove(int mouse_x, int mouse_y);
 	
-	public void playerWantsToRotateAdditionalWall();
+	public void playerWantsToRotateAdditionalWall(int mode);
 	
 	public void playerHasFinishedHisRound();
 	

@@ -22,6 +22,9 @@ public class Wall extends GraphVertex{
 	public static final int T_VERS_LE_BAS = 2;
 	public static final int T_VERS_LA_GAUCHE = 3;
 
+	public static final int TO_THE_LEFT = 0;
+	public static final int TO_THE_RIGHT = 1;
+
 	private SpriteGUI textures;
 	
 	private float scale = 1.0f;
@@ -133,9 +136,13 @@ public class Wall extends GraphVertex{
 		
 		this.hoover = false;
 	}
-	public void rotateWall(){
+	public void rotateWall(int mode){
 		
-		this.angle = (this.angle + 1) % 4;
+		if(mode == Wall.TO_THE_RIGHT){
+			this.angle = (this.angle + 1) % 4;
+		}else{
+			this.angle = (this.angle - 1) % 4;
+		}
 		
 	}
 

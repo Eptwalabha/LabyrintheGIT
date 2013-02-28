@@ -11,6 +11,8 @@ import com.labyrinth.gui.SpriteGUI;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.labyrinth.menu.Button;
+import com.labyrinth.menu.SliderComponent;
 import com.labyrinth.menu.wheel.MenuWheel;
 import com.labyrinth.objective.Objective;
 import com.labyrinth.utils.graph.GraphVertex;
@@ -38,6 +40,8 @@ public class GameBoard extends BasicGameState implements PlayerListener{
 	private int joueur_en_cours = 0;
 	
 	private Input input;
+	private Button bouton;
+	private SliderComponent slider;
 	
 	@Override
 	public void init(GameContainer arg0, StateBasedGame arg1)
@@ -47,8 +51,15 @@ public class GameBoard extends BasicGameState implements PlayerListener{
 		SpriteGUI wall_texture = new SpriteGUI("images/murs/wall.png", 12, 4);
 		SpriteGUI player_texture = new SpriteGUI("images/items/player.png", 1, 1);
 		SpriteGUI wheel_texture = new SpriteGUI("images/menu/wheel.png", 3, 1, SpriteGUI.CENTER, SpriteGUI.BOTTOM);
+		SpriteGUI button_texture = new SpriteGUI("images/menu/button.png", 4, 1);
+		SpriteGUI slider_texture = new SpriteGUI("images/menu/slider.png", 5, 1);
 		this.objective_textures = new SpriteGUI("images/items/objective.png", 1, 1);
-		
+		this.bouton = new Button(0, button_texture);
+		this.bouton.setPosition(0, 500);
+		this.bouton.setVisible(true);
+		this.slider = new SliderComponent(1, 1000, 0, slider_texture);
+		this.slider.setPosition(20, 600);
+		this.slider.setVisible(true);
 		this.menu_wheel = new MenuWheel(wheel_texture);
 		
 		this.origin.setWidth(wall_texture.getTileWidth());
@@ -112,6 +123,8 @@ public class GameBoard extends BasicGameState implements PlayerListener{
 		arg2.setColor(Color.red);
 		arg2.drawLine(300, 0, 300, arg0.getHeight());
 
+		this.bouton.render(arg2);
+		this.slider.render(arg2);
 	}
 
 	@Override
@@ -123,11 +136,14 @@ public class GameBoard extends BasicGameState implements PlayerListener{
 				this.labyrinth.getNumberOfCollumn() * this.origin.getWidth(),
 				this.labyrinth.getNumberOfLine() * this.origin.getWidth());
 		
-		Input i = arg0.getInput();
-		this.labyrinth.hooverAt(i.getMouseX(), i.getAbsoluteMouseY(), Maze.MODE_CROSS);
+		Input in = arg0.getInput();
+		
+		this.bouton.update(in);
+		this.slider.setCursor((int) (Math.random() * 500 + 250));
+		
+		this.labyrinth.hooverAt(in.getMouseX(), in.getAbsoluteMouseY(), Maze.MODE_CROSS);
 		
 		this.labyrinth.update(arg0);
-		Input in = arg0.getInput();
 		
 		if(in.isKeyDown(Input.KEY_LEFT)){
 			this.origin.setOriginPosition(this.origin.getOX() - 5, this.origin.getOY());
@@ -147,25 +163,18 @@ public class GameBoard extends BasicGameState implements PlayerListener{
 			if(p.isMoving()) p.move();
 		}
 		
-		if(in.isMouseButtonDown(Input.MOUSE_RIGHT_BUTTON)){
-			
-			
-			
-		}
-		
 		int taux = 2;
 		if(in.isKeyPressed(Input.KEY_P)) this.origin.setWidth(this.origin.getWidth() + taux);
 		if(in.isKeyPressed(Input.KEY_M)) this.origin.setWidth(this.origin.getWidth() - taux);
 		
 		if(in.isKeyPressed(Input.KEY_TAB)){
-			this.labyrinth.rotateAdditionalWall();
+			this.labyrinth.rotateAdditionalWall(Wall.TO_THE_RIGHT);
 		}
 		
 		if(in.isKeyPressed(Input.KEY_SPACE)) this.labyrinth.shakeWall();
 
 		if(in.isKeyPressed(Input.KEY_ENTER)){
-			this.players.get(this.joueur_en_cours).setNewDestination(null);			
-//			this.labyrinth.insertWallHere(Maze.INSERT_FROM_LEFT, 1);
+			this.players.get(this.joueur_en_cours).setNewDestination(null);
 		}
 
 		if(in.isKeyPressed(Input.KEY_G)) this.printGraph();
@@ -257,8 +266,8 @@ public class GameBoard extends BasicGameState implements PlayerListener{
 	}
 	
 	@Override
-	public void playerWantsToRotateAdditionalWall() {
-		this.labyrinth.rotateAdditionalWall();
+	public void playerWantsToRotateAdditionalWall(int mode) {
+		this.labyrinth.rotateAdditionalWall(mode);
 	}
 
 	@Override
