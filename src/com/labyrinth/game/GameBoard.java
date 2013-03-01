@@ -1,9 +1,12 @@
 package com.labyrinth.game;
 
+import com.labyrinth.cursor.Cursor;
+import com.labyrinth.cursor.CursorMovePlayer;
+import com.labyrinth.cursor.CursorMoveWall;
 import com.labyrinth.game.maze.Maze;
 import com.labyrinth.game.maze.Wall;
 import com.labyrinth.game.player.Player;
-import com.labyrinth.game.player.PlayerListener;
+import com.labyrinth.game.player.PlayerEventListener;
 import com.labyrinth.game.player.ai.AIPlayer;
 import com.labyrinth.game.player.human.HumanPlayer;
 import com.labyrinth.gui.SpriteGUI;
@@ -11,9 +14,6 @@ import com.labyrinth.gui.SpriteGUI;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.labyrinth.menu.Button;
-import com.labyrinth.menu.SliderComponent;
-import com.labyrinth.menu.wheel.MenuWheel;
 import com.labyrinth.objective.Objective;
 import com.labyrinth.utils.graph.GraphVertex;
 
@@ -21,27 +21,34 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
+import org.newdawn.slick.MouseListener;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 
-public class GameBoard extends BasicGameState implements PlayerListener{
+public class GameBoard extends BasicGameState implements PlayerEventListener{
 
-	private boolean bouton_droit_souris;
-	private SpriteGUI objective_textures;
-	private MenuWheel menu_wheel;
+	public final static int STEP_WAIT = 0;
+	public final static int STEP_MOVE_WALL = 1;
+	public final static int STEP_MOVE_PLAYER = 2;
 	
-	private Maze labyrinth;
+	
+	private boolean right_mouse_button;
+	private SpriteGUI objective_textures;
+	
+	private Cursor cursor_move_wall;
+	private Cursor cursor_move_player;
+	
+	private Maze maze;
 
 	private Origin origin;
 	private List<Player> players = new ArrayList<Player>();
 	private List<Objective> objectives = new ArrayList<Objective>();
 	
-	private int joueur_en_cours = 0;
+	private int current_player = 0;
+	private int last_line = -1, last_row = -1, last_direction= -1;
 	
 	private Input input;
-	private Button bouton;
-	private SliderComponent slider;
 	
 	@Override
 	public void init(GameContainer arg0, StateBasedGame arg1)
@@ -49,82 +56,161 @@ public class GameBoard extends BasicGameState implements PlayerListener{
 		
 		this.origin = new Origin();
 		SpriteGUI wall_texture = new SpriteGUI("images/murs/wall.png", 12, 4);
-		SpriteGUI player_texture = new SpriteGUI("images/items/player.png", 1, 1);
+		SpriteGUI player_texture = new SpriteGUI("images/items/player.png", 1, 4);
 		SpriteGUI wheel_texture = new SpriteGUI("images/menu/wheel.png", 3, 1, SpriteGUI.CENTER, SpriteGUI.BOTTOM);
-		SpriteGUI button_texture = new SpriteGUI("images/menu/button.png", 4, 1);
-		SpriteGUI slider_texture = new SpriteGUI("images/menu/slider.png", 5, 1);
-		this.objective_textures = new SpriteGUI("images/items/objective.png", 1, 1);
-		this.bouton = new Button(0, button_texture);
-		this.bouton.setPosition(0, 500);
-		this.bouton.setVisible(true);
-		this.slider = new SliderComponent(1, 1000, 0, slider_texture);
-		this.slider.setPosition(20, 600);
-		this.slider.setVisible(true);
-		this.menu_wheel = new MenuWheel(wheel_texture);
+		this.objective_textures = new SpriteGUI("images/items/objective.png", 1, 4);
+		
+		this.cursor_move_wall = new CursorMoveWall(wheel_texture);
+		this.cursor_move_wall.addPlayerListener(this);
+		
+		this.cursor_move_player = new CursorMovePlayer(wheel_texture);
+		this.cursor_move_player.addPlayerListener(this);
 		
 		this.origin.setWidth(wall_texture.getTileWidth());
 		this.players = new ArrayList<Player>();		
 		
-		this.labyrinth = new Maze(13, 13, this.origin, wall_texture);
-		
-		Player p1 = new HumanPlayer(0, "test", this.origin, player_texture, this.labyrinth.getWall(0, 0), this, this.menu_wheel);
-		Player p2 = new HumanPlayer(0, "test2", this.origin, player_texture, this.labyrinth.getWall(this.labyrinth.getNumberOfCollumn() - 1, this.labyrinth.getNumberOfLine() - 1), this, this.menu_wheel);
-		Player p3 = new AIPlayer(0, this.origin, player_texture, this.labyrinth.getWall(this.labyrinth.getNumberOfCollumn() - 1, 0), this, this.labyrinth);
-
-		this.players.add(p1);
-		this.players.add(p2);
-		this.players.add(p3);
-		
-		this.joueur_en_cours = 0;
+		this.maze = new Maze(7, 7, this.origin, wall_texture);
 		
 		this.input = arg0.getInput();
 		
-		int mx = this.labyrinth.getNumberOfCollumn();
-		int my = this.labyrinth.getNumberOfLine();
+		Player p1 = new HumanPlayer(this.generateUniqueId(), "test", this.origin, player_texture, this.maze.getWall(0, 0), this);
+		p1.setPlayerPosition(0);
+		input.addMouseListener((MouseListener) p1);
+		this.players.add(p1);
 		
-		for(int i = 0; i < this.players.size() * 5; i++){
-			Wall w;
-			boolean wall_already_used;
-			
-			do{
-				wall_already_used = false;
-				w = this.labyrinth.getWall((int)(Math.random() * mx), (int)(Math.random() * my));
-				for(int j = 0; j < this.objectives.size(); j++){
-					if(w == this.objectives.get(j).getPosition()) wall_already_used = true;
-				}
+		Player p2 = new HumanPlayer(this.generateUniqueId(), "test2", this.origin, player_texture, this.maze.getWall(this.maze.getNumberOfCollumn() - 1, this.maze.getNumberOfLine() - 1), this);
+		p2.setPlayerPosition(1);
+		input.addMouseListener((MouseListener) p2);
+		this.players.add(p2);
+		
+		Player p3 = new AIPlayer(this.generateUniqueId(), this.origin, player_texture, this.maze.getWall(this.maze.getNumberOfCollumn() - 1, 0), this, this.maze);
+		p3.setPlayerPosition(2);
+		this.players.add(p3);
+		
+		this.current_player = 0;
+		
+		int mx = this.maze.getNumberOfCollumn();
+		int my = this.maze.getNumberOfLine();
+		
+		for(Player p: this.players){
+			for(int i = 0; i < 5; i++){
+				Wall w;
+				boolean wall_already_used;
 				
-			}while(wall_already_used);
-			this.objectives.add(new Objective(w, objective_textures));
+				do{
+					wall_already_used = false;
+					w = this.maze.getWall((int)(Math.random() * mx), (int)(Math.random() * my));
+					for(int j = 0; j < this.objectives.size(); j++){
+						if(w == this.objectives.get(j).getPosition()) wall_already_used = true;
+					}
+					
+				}while(wall_already_used);
+				Objective o = new Objective(w, objective_textures, p);
+				p.addObjective(o);
+				objectives.add(o);
+			}
 		}
 		
-		p1.setPlayerObjective(this.objectives.get(0));
-		p2.setPlayerObjective(this.objectives.get(1));
-		p3.setPlayerObjective(this.objectives.get(2));
-
-		this.players.get(this.joueur_en_cours).beginOfRound();
+		this.players.get(this.current_player).setStep(GameBoard.STEP_MOVE_WALL);
+		this.players.get(this.current_player).getPlayerObjective().active(true);
 
 	}
-
-	@Override
-	public void render(GameContainer arg0, StateBasedGame arg1, Graphics arg2)
-			throws SlickException {
-		this.labyrinth.render(arg0, arg2);
-		this.labyrinth.getAdditionalWall().render(0, 0, 150);
+	
+	private int generateUniqueId(){
 		
+		int result;
+		int exist = 0;
+		do{
+			exist = 0;
+			result = (int) (Math.random() * 10000);
+			
+			for(Player p : this.players){
+				exist = (p.getPlayerId() == result) ? exist + 1 : exist;
+			}
+		}while(exist != 0);
+		
+		System.out.println("id généré: " + result);
+		return result;
+	}
+
+
+	private void printGraph() {
+		if(this.players.get(this.current_player).isMoving()){
+			this.players.get(this.current_player).getPath().printGraph(0, 0);
+		}
+		
+	}
+	
+	private boolean isTheCurrentPlayer(int id){
+		return (this.players.get(this.current_player).getPlayerId() == id);
+	}
+	
+	private void nextPlayer(){
+		
+		Player p = this.players.get(this.current_player);
+		p.setStep(GameBoard.STEP_WAIT);
+		p.getPlayerObjective().active(false);
+		
+		this.current_player = (this.current_player + 1) % this.players.size();
+		
+		p = this.players.get(this.current_player);
+		p.setStep(GameBoard.STEP_MOVE_WALL);
+		p.getPlayerObjective().active(true);
+		
+	}
+	
+	private void checkObjectives(){
+		
+		for(Player p: this.players){
+			Objective o = p.getPlayerObjective();
+			if(o != null){
+				if(p.getPosition() == o.getPosition()){
+					p.nextObjective();
+				}
+			}
+		}
+		
+	}
+	
+	private void checkIfPlayerPushed(Wall old){
+
+		Wall last = this.maze.getAdditionalWall();
+		for(Player p: this.players){
+			if(p.getPosition() == last){
+				p.setPosition(old);
+			}
+		}
+
+	}
+	
+	@Override
+	public void render(GameContainer arg0, StateBasedGame arg1, Graphics g)
+			throws SlickException {
+		this.maze.render(arg0, g);
+		
+		this.maze.getAdditionalWall().render(75, 75, 150);
 		for(Objective o : objectives){
-			o.render(arg0, arg2);
+			o.render(g);
 		}
 
 		for(Player j : players){
-			j.render(arg0, arg2);
+			j.render(arg0, g);
 		}
 		
+		this.cursor_move_player.render(g);
+		this.cursor_move_wall.render(g);
+		g.setColor(Color.red);
+		g.drawLine(300, 0, 300, arg0.getHeight());
+		g.setColor(Color.white);
+		g.drawString("Tab \nFaire pivoter le mur", 25, 350);
+		int pos = 400;
+		for(Player j : players){
+			g.drawString("Joueur " + (j.getPlayerPosition() + 1) + ": " + j.getPlayerScore() + " point(s)", 25, pos);
+			pos += 25;
+		}
+		g.drawString("Tab \nFaire pivoter le mur", 25, 350);
 		
-		arg2.setColor(Color.red);
-		arg2.drawLine(300, 0, 300, arg0.getHeight());
 
-		this.bouton.render(arg2);
-		this.slider.render(arg2);
 	}
 
 	@Override
@@ -133,18 +219,11 @@ public class GameBoard extends BasicGameState implements PlayerListener{
 		
 		this.origin.setBounds(300, 0,
 				arg0.getWidth() - 300, arg0.getHeight(),
-				this.labyrinth.getNumberOfCollumn() * this.origin.getWidth(),
-				this.labyrinth.getNumberOfLine() * this.origin.getWidth());
+				this.maze.getNumberOfCollumn() * this.origin.getWidth(),
+				this.maze.getNumberOfLine() * this.origin.getWidth());
 		
 		Input in = arg0.getInput();
-		
-		this.bouton.update(in);
-		this.slider.setCursor((int) (Math.random() * 500 + 250));
-		
-		this.labyrinth.hooverAt(in.getMouseX(), in.getAbsoluteMouseY(), Maze.MODE_CROSS);
-		
-		this.labyrinth.update(arg0);
-		
+
 		if(in.isKeyDown(Input.KEY_LEFT)){
 			this.origin.setOriginPosition(this.origin.getOX() - 5, this.origin.getOY());
 		}
@@ -160,42 +239,34 @@ public class GameBoard extends BasicGameState implements PlayerListener{
 		
 		for(Player p: players){
 			p.update(arg0);
-			if(p.isMoving()) p.move();
+			if(p.isMoving()){
+				p.move();
+				this.checkObjectives();
+			}
 		}
-		
-		int taux = 2;
-		if(in.isKeyPressed(Input.KEY_P)) this.origin.setWidth(this.origin.getWidth() + taux);
-		if(in.isKeyPressed(Input.KEY_M)) this.origin.setWidth(this.origin.getWidth() - taux);
 		
 		if(in.isKeyPressed(Input.KEY_TAB)){
-			this.labyrinth.rotateAdditionalWall(Wall.TO_THE_RIGHT);
+			this.maze.rotateAdditionalWall(Wall.TO_THE_RIGHT);
 		}
 		
-		if(in.isKeyPressed(Input.KEY_SPACE)) this.labyrinth.shakeWall();
+		if(in.isKeyPressed(Input.KEY_SPACE)) this.maze.shakeWall();
 
 		if(in.isKeyPressed(Input.KEY_ENTER)){
-			this.players.get(this.joueur_en_cours).setNewDestination(null);
+			this.players.get(this.current_player).setNewDestination(null);
 		}
 
 		if(in.isKeyPressed(Input.KEY_G)) this.printGraph();
 	}
-
+	
 	@Override
 	public int getID() {
 		return 0;
 	}
 
-	private void printGraph() {
-		if(this.players.get(this.joueur_en_cours).isMoving()){
-			this.players.get(this.joueur_en_cours).getPath().printGraph(0, 0);
-		}
-		
-	}
-	
 	@Override
 	public void mouseDragged(int arg0, int arg1, int arg2, int arg3) {
 		
-		if(this.bouton_droit_souris){
+		if(this.right_mouse_button){
 			int x = this.origin.getOX() - (arg0 - arg2);
 			int y = this.origin.getOY() - (arg1 - arg3);
 			
@@ -207,15 +278,14 @@ public class GameBoard extends BasicGameState implements PlayerListener{
 	@Override
 	public void mousePressed(int arg0, int arg1, int arg2) {
 		if(arg0 == Input.MOUSE_RIGHT_BUTTON){
-			this.bouton_droit_souris = true;
+			this.right_mouse_button = true;
 		}
 	}
 
 	@Override
 	public void mouseReleased(int arg0, int arg1, int arg2) {
-		// TODO Auto-generated method stub
 		if(arg0 == Input.MOUSE_RIGHT_BUTTON){
-			this.bouton_droit_souris = false;
+			this.right_mouse_button = false;
 		}
 		
 	}
@@ -245,46 +315,146 @@ public class GameBoard extends BasicGameState implements PlayerListener{
 	}
 
 	@Override
-	public void playerWantsToPushWall(int mouse_x, int mouse_y, int direction) {
-		
-		
-		this.labyrinth.insertWallHere(mouse_x, mouse_y, direction);
+	public boolean playerWantsToPushWallAt(int id_player, int mouse_x, int mouse_y, int direction) {
+		if(this.isTheCurrentPlayer(id_player)){
+			
+		}
+		return false;
 	}
 
 	@Override
-	public void playerWantsToMove(int mouse_x, int mouse_y) {
+	public boolean playerWantsToMoveAt(int id_player, int mouse_x, int mouse_y) {
+		if(this.isTheCurrentPlayer(id_player)){
+	
+		}
+		return false;
+	}
+	
+	@Override
+	public void playerWantsToRotateAdditionalWall(int id_player, int mode) {
+		if(this.isTheCurrentPlayer(id_player)){
+			this.maze.rotateAdditionalWall(mode);
+		}
+	}
 
-		Wall dest = this.labyrinth.getWallAt(mouse_x, mouse_y);
-		
-		if(dest != null){			
-			this.labyrinth.resetWeightGraph();
-			GraphVertex path = this.players.get(this.joueur_en_cours).getPosition().getShortestPathRecursive(dest);
-			if(path != null){
-				this.players.get(this.joueur_en_cours).setNewDestination(path);
+	@Override
+	public void playerHasFinishedHisRound(int id_player) {
+		if(this.isTheCurrentPlayer(id_player)){
+			this.nextPlayer();
+		}
+	}
+
+	@Override
+	public void playerClicksToPushWall(int id_player, int mouse_x, int mouse_y, int direction) {
+		if(this.isTheCurrentPlayer(id_player)){
+			
+			this.last_line = this.maze.getLineNumber(mouse_y);
+			this.last_row = this.maze.getRowNumber(mouse_x);
+			this.last_direction = direction;
+			
+			Wall old = this.maze.getAdditionalWall();
+			this.maze.insertWallHere(mouse_x, mouse_y, direction);
+			this.checkIfPlayerPushed(old);
+			
+			this.players.get(this.current_player).setStep(GameBoard.STEP_MOVE_PLAYER);
+			this.checkObjectives();
+		}
+	}
+
+	@Override
+	public void playerClicksToMove(int id_player, int mouse_x, int mouse_y) {
+		if(this.isTheCurrentPlayer(id_player)){
+			Wall dest = this.maze.getWallAt(mouse_x, mouse_y);
+			
+			if(dest != null){			
+				this.maze.resetWeightGraph();
+				GraphVertex path = this.players.get(this.current_player).getPosition().getShortestPathRecursive(dest);
+				if(path != null){
+					this.players.get(this.current_player).setNewDestination(path);
+					this.nextPlayer();
+				}
 			}
 		}
 	}
 	
+
 	@Override
-	public void playerWantsToRotateAdditionalWall(int mode) {
-		this.labyrinth.rotateAdditionalWall(mode);
+	public void highLight(int mouse_x, int mouse_y, int mode) {
+		this.maze.hooverAt(mouse_x, mouse_y, mode);
 	}
 
 	@Override
-	public void playerHasFinishedHisRound() {
+	public void eventMousePressed(int player_id, int mouse_x, int mouse_y) {
 		
-		this.players.get(this.joueur_en_cours).endOfRound();
-		this.joueur_en_cours = (this.joueur_en_cours + 1) % this.players.size() ;
-		this.players.get(this.joueur_en_cours).beginOfRound();
+		if(this.isTheCurrentPlayer(player_id)){
+			if(this.players.get(this.current_player).getTypeOfPlayer() == Player.HUMAN){
+				
+				switch (this.players.get(this.current_player).getStep()) {
+				case GameBoard.STEP_MOVE_WALL:
+					if(!this.cursor_move_wall.isEnable()){
+						this.cursor_move_wall.invoke(mouse_x, mouse_y);
+						int line = this.maze.getLineNumber(mouse_y);
+						int row = this.maze.getRowNumber(mouse_x);
+						((CursorMoveWall) this.cursor_move_wall).setLineEnable(line % 2 != 0);
+						((CursorMoveWall) this.cursor_move_wall).setRowEnable(row % 2 != 0);
+					}
+					break;
+				case GameBoard.STEP_MOVE_PLAYER:
+					if(!this.cursor_move_player.isEnable()){
+						this.cursor_move_player.invoke(mouse_x, mouse_y);
+					}
+					break;
+				}
+			}
+		}
 		
 	}
 
 	@Override
-	public Objective playerWantsNewObjective() {
+	public void eventMouseDrag(int player_id, int mouse_x, int mouse_y) {
 		
-		Objective obj = new Objective(this.labyrinth.getWall((int)(Math.random() * this.labyrinth.getNumberOfCollumn()), (int)(Math.random() * this.labyrinth.getNumberOfLine())), this.objective_textures);
+		if(this.isTheCurrentPlayer(player_id)){
+			if(this.players.get(this.current_player).getTypeOfPlayer() == Player.HUMAN){
+				
+				switch (this.players.get(this.current_player).getStep()) {
+				case GameBoard.STEP_MOVE_WALL:
+					if(this.cursor_move_wall.isEnable()){
+						this.cursor_move_wall.drag(mouse_x, mouse_y);
+					}
+					break;
+				case GameBoard.STEP_MOVE_PLAYER:
+					if(this.cursor_move_player.isEnable()){
+						this.cursor_move_player.drag(mouse_x, mouse_y);
+					}
+					break;
+				}
+			}
+		}
+	}
+
+	@Override
+	public void eventMouseReleased(int player_id, int mouse_x, int mouse_y) {
 		
-		return obj;
+		if(this.isTheCurrentPlayer(player_id)){
+			
+			if(this.players.get(this.current_player).getTypeOfPlayer() == Player.HUMAN){
+				
+				switch (this.players.get(this.current_player).getStep()) {
+				case GameBoard.STEP_MOVE_WALL:
+					if(this.cursor_move_wall.isEnable()){
+						this.cursor_move_wall.release(player_id, mouse_x, mouse_y);
+					}
+					break;
+				case GameBoard.STEP_MOVE_PLAYER:
+					if(this.cursor_move_player.isEnable()){
+						this.cursor_move_player.release(player_id, mouse_x, mouse_y);
+					}
+					break;
+				}
+			}
+			
+		}
+		
 	}
 
 }

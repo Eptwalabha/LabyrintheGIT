@@ -14,39 +14,65 @@ import com.labyrinth.utils.graph.GraphVertex;
 
 public abstract class Player {
 	
-	protected Wall position;
-	private boolean playing = false;
+	public final static int HUMAN = 0;
+	public final static int AI = 1;
+	public final static int ONLINE = 2;
 	
-	private GraphVertex path;
 	
 	protected SpriteGUI textures;
-	protected Origin origin;
+	protected List<PlayerEventListener> listeners;
 	
-	private List<PlayerListener> listeners;
-	
-	private Objective player_objetive;
-	private int player_score = 0;
+	private Wall position;
+	private GraphVertex path;
+	private Origin origin;
+	private List<Objective> objetive;
 	private String player_name;
-	protected PlayerListener listener;
-	
+	private int player_score = 0;
+	private int player_position = 0;
 	private int player_id;
+	private int step;
+	private long time_next_move = 0;
 	
-	protected int step;
-	
-	public Player(int player_id, String name, Origin origin, SpriteGUI textures, Wall start_position, PlayerListener listener){
+	public Player(int player_id, String name, Origin origin, SpriteGUI textures, Wall start_position, PlayerEventListener listener){
 		
+		this.objetive = new ArrayList<Objective>();
 		this.textures = textures;
 		this.origin = origin;
 		this.position = start_position;
 		this.player_id = player_id;
+		this.player_name = name;
 		this.path = null;
 		
-		this.listeners = new ArrayList<PlayerListener>();
+		this.listeners = new ArrayList<PlayerEventListener>();
 		this.listeners.add(listener);
+	}
+	
+	public void addObjective(Objective objective){
+		this.objetive.add(objective);
+	}
+	
+	public void setPlayerPosition(int position){
+		this.player_position = position;
+	}
+	
+	public int getPlayerPosition(){
+		return this.player_position;
 	}
 	
 	public Wall getPosition(){
 		return this.position;
+	}
+	
+	public void setPosition(Wall position){
+		this.position = position;
+	}
+	
+	
+	public Objective getPlayerObjective(){
+		if(this.objetive.size() > 0){
+			return this.objetive.get(0);
+		}
+		return null;
 	}
 	
 	public void setNewDestination(GraphVertex path){
@@ -60,11 +86,15 @@ public abstract class Player {
 	}
 	
 	public void move(){
-		this.position = (Wall) path.getVerticeSon();
-		if(path.getVerticeBrother() != null){
-			path = path.getVerticeBrother();
-		}else{
-			path = null;
+		long t = System.currentTimeMillis();
+		if(t >= this.time_next_move){
+			this.position = (Wall) path.getVerticeSon();
+			if(path.getVerticeBrother() != null){
+				path = path.getVerticeBrother();
+				this.time_next_move = t + 200;
+			}else{
+				path = null;
+			}
 		}
 	}
 	
@@ -76,22 +106,25 @@ public abstract class Player {
 		return this.player_id;
 	}
 	
-	public void beginOfRound(){
-		this.playing = true;
-		this.player_objetive.active(true);
+	public void setStep(int step){
+		this.step = step;
 	}
 	
-	public void endOfRound(){
-		this.playing = false;
-		this.player_objetive.active(false);
+	public int getStep(){
+		return this.step;
 	}
 	
-	public boolean isPlaying(){
-		return this.playing;
-	}
-	
-	public void setPlayerObjective(Objective o){
-		this.player_objetive = o;
+	public void nextObjective(){
+		
+		this.incrementPlayerScore();
+		
+		if(this.objetive.size() > 0){
+			
+			Objective o = this.objetive.get(0);
+			o.setEnable(false);
+			
+			this.objetive.remove(0);
+		}
 	}
 	
 	public String getPlayerName(){
@@ -102,34 +135,29 @@ public abstract class Player {
 		return this.player_score;
 	}
 	
+	private void incrementPlayerScore(){
+		this.player_score++;
+	}
+	
 	public void render(GameContainer gc, Graphics g) {
 
-		this.player_objetive.update();
-				
+		if(this.objetive.size() > 0){
+			this.objetive.get(0).update();
+		}
+		
 		int x = this.position.getPositionX();
 		int y = this.position.getPositionY();
 		
-		this.textures.getSpriteAt(0, 0, this.origin.getWidth()).draw(x, y);
+		this.textures.getSpriteAt(0, this.player_position, this.origin.getWidth()).draw(x, y);
 	}
+	
+	public abstract int getTypeOfPlayer();
 	
 	public abstract void update(GameContainer gc);
 	
-	public void playerWantsToMove(int mouse_x, int mouse_y){
-		for(PlayerListener p : listeners){
-			p.playerWantsToMove(mouse_x, mouse_y);
-		}
-	}
-	
-	public void playerWantsToPushWall(int mouse_x, int mouse_y, int direction){
-		for(PlayerListener p : listeners){
-			p.playerWantsToPushWall(mouse_x, mouse_y, direction);
-		}
-	}
-	
 	public void playerHasFinishedHisRound(){
-		for(PlayerListener p : listeners){
-			p.playerHasFinishedHisRound();
+		for(PlayerEventListener p :this.listeners){
+			p.playerHasFinishedHisRound(this.player_id);
 		}
-		
 	}
 }

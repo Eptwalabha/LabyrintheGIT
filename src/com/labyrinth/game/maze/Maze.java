@@ -26,7 +26,7 @@ public class Maze {
 	private SpriteGUI textures;
 	
 	private Origin origin;
-	private int nbr_of_collumn, nbr_of_line;
+	private int nbr_of_row, nbr_of_line;
 	
 	private boolean wall_moving = false;
 	private int wall_moving_direction = -1;
@@ -37,16 +37,16 @@ public class Maze {
 		this(7, 7, origin, textures);
 	}
 	
-	public Maze(int nbr_of_collumn, int nbr_of_line, Origin origin, SpriteGUI textures){
+	public Maze(int nbr_of_row, int nbr_of_line, Origin origin, SpriteGUI textures){
 		
 		this.textures = textures;
 		this.origin = origin;
-		if(nbr_of_collumn < 5) nbr_of_collumn = 5;
-		if(nbr_of_collumn % 2 == 0) nbr_of_collumn++;
+		if(nbr_of_row < 5) nbr_of_row = 5;
+		if(nbr_of_row % 2 == 0) nbr_of_row++;
 		if(nbr_of_line < 5) nbr_of_line = 5;
 		if(nbr_of_line % 2 == 0) nbr_of_line++;
 		
-		this.nbr_of_collumn = nbr_of_collumn;
+		this.nbr_of_row = nbr_of_row;
 		this.nbr_of_line = nbr_of_line;
 		
 		this.additional_wall = new Wall((int)(Math.random() * 2), 11, 0, (int)(Math.random() * 2), "", this.textures, true);
@@ -58,9 +58,9 @@ public class Maze {
 		
 	private void labyrinthCreation(){
 
-		this.walls = new Wall[this.nbr_of_collumn][this.nbr_of_line];
+		this.walls = new Wall[this.nbr_of_row][this.nbr_of_line];
 				
-		for(int i = 0; i < this.nbr_of_collumn; i++){
+		for(int i = 0; i < this.nbr_of_row; i++){
 			for(int j = 0; j < this.nbr_of_line; j++){
 				
 				if((i % 2 == 0) && (j % 2 == 0)){
@@ -68,7 +68,7 @@ public class Maze {
 						if(j == 0) this.walls[i][j] = new Wall(Wall.TYPE_L, i, j, Wall.L_BAS_DROITE, i+"."+j, this.textures, false);
 						if(j == this.nbr_of_line - 1) this.walls[i][j] = new Wall(Wall.TYPE_L, i, j, Wall.L_HAUT_DROITE, i+"."+j, this.textures, false);
 						if(j > 0 && j < this.nbr_of_line - 1) this.walls[i][j] = new Wall(Wall.TYPE_T, i, j, Wall.T_VERS_LA_DROITE, i+"."+j, this.textures, false);
-					}else if(i == this.nbr_of_collumn - 1){
+					}else if(i == this.nbr_of_row - 1){
 						if(j == 0) this.walls[i][j] = new Wall(Wall.TYPE_L, i, j, Wall.L_BAS_GAUCHE, i+"."+j, this.textures, false);
 						if(j == this.nbr_of_line - 1) this.walls[i][j] = new Wall(Wall.TYPE_L, i, j, Wall.L_HAUT_GAUCHE, i+"."+j, this.textures, false);
 						if(j > 0 && j < this.nbr_of_line - 1) this.walls[i][j] = new Wall(Wall.TYPE_T, i, j, Wall.T_VERS_LA_GAUCHE, i+"."+j, this.textures, false);
@@ -91,11 +91,11 @@ public class Maze {
 	
 	private void graphCreation(){
 		
-		for(int i = 0; i < this.nbr_of_collumn; i++){
+		for(int i = 0; i < this.nbr_of_row; i++){
 			for(int j = 0; j < this.nbr_of_line; j++){
 				
 				Wall nord = (j > 0) ? this.walls[i][j - 1] : null;
-				Wall est = (i < this.nbr_of_collumn - 1) ? this.walls[i + 1][j] : null;
+				Wall est = (i < this.nbr_of_row - 1) ? this.walls[i + 1][j] : null;
 				Wall sud = (j < this.nbr_of_line - 1) ? this.walls[i][j + 1] : null;
 				Wall ouest = (i > 0) ? this.walls[i - 1][j] : null;
 				
@@ -181,7 +181,7 @@ public class Maze {
 	public void randomMap() throws SlickException{
 		
 		this.labyrinthCreation();
-		for(int i = 0; i < this.nbr_of_collumn; i++){
+		for(int i = 0; i < this.nbr_of_row; i++){
 			for(int j = 0; j < this.nbr_of_line; j++){
 				this.walls[i][j].resetVerticeWeight();
 			}
@@ -192,13 +192,13 @@ public class Maze {
 	
 	public void shakeWall(){
 		
-		for(int i = 0; i < this.nbr_of_collumn; i++){
+		for(int i = 0; i < this.nbr_of_row; i++){
 			for(int j = 0; j < this.nbr_of_line; j++){
 				if(this.walls[i][j].isPushable()) this.walls[i][j].setRotation((int)(Math.random() * 4));
 			}
 		}
 		
-		for(int i = 0; i < this.nbr_of_collumn; i++){
+		for(int i = 0; i < this.nbr_of_row; i++){
 			for(int j = 0; j < this.nbr_of_line; j++){
 				this.walls[i][j].resetVerticeWeight();
 			}
@@ -209,11 +209,13 @@ public class Maze {
 	
 	public void insertWallHere(int mouse_x, int mouse_y, int mode){
 		
-		int coll = (int) ((mouse_x - this.origin.getOX()) / (this.origin.getWidth()));
-		int line = (int) ((mouse_y - this.origin.getOY()) / (this.origin.getWidth()));
+		int coll = this.getRowNumber(mouse_x);
+//		(int) ((mouse_x - this.origin.getOX()) / (this.origin.getWidth()));
+		int line = this.getLineNumber(mouse_y);
+//		(int) ((mouse_y - this.origin.getOY()) / (this.origin.getWidth()));
 		
 		if(mode == INSERT_FROM_BOTTOM || mode == INSERT_FROM_TOP){
-			if(coll < this.nbr_of_collumn && coll >= 0 && coll % 2 != 0){
+			if(coll < this.nbr_of_row && coll >= 0 && coll % 2 != 0){
 				Wall temp = (mode == INSERT_FROM_BOTTOM) ? this.walls[coll][0] : this.walls[coll][this.nbr_of_line - 1];
 				for(int i = 0; i < this.nbr_of_line; i++){
 					if(mode == INSERT_FROM_BOTTOM){
@@ -243,17 +245,17 @@ public class Maze {
 			} 
 		}else{
 			if(line < this.nbr_of_line && line >= 0  && line % 2 != 0){
-				Wall temp = (mode == INSERT_FROM_RIGHT) ? this.walls[0][line] : this.walls[this.nbr_of_collumn - 1][line];
-				for(int i = 0; i < this.nbr_of_collumn; i++){
+				Wall temp = (mode == INSERT_FROM_RIGHT) ? this.walls[0][line] : this.walls[this.nbr_of_row - 1][line];
+				for(int i = 0; i < this.nbr_of_row; i++){
 					if(mode == INSERT_FROM_RIGHT){
-						if(i < this.nbr_of_collumn - 1){
+						if(i < this.nbr_of_row - 1){
 							this.walls[i][line] = this.walls[i + 1][line];
 							this.walls[i][line].setCoordinates(i, line);
 						}
 					}else{
-						if(nbr_of_collumn - 1 - i > 0){
-							this.walls[nbr_of_collumn - 1 - i][line] = this.walls[nbr_of_collumn - 2 - i][line];
-							this.walls[nbr_of_collumn - 1 - i][line].setCoordinates(nbr_of_collumn - 1 - i, line);
+						if(nbr_of_row - 1 - i > 0){
+							this.walls[nbr_of_row - 1 - i][line] = this.walls[nbr_of_row - 2 - i][line];
+							this.walls[nbr_of_row - 1 - i][line].setCoordinates(nbr_of_row - 1 - i, line);
 						}
 					}
 				}
@@ -274,7 +276,7 @@ public class Maze {
 		
 		this.graphCreation();
 		
-		this.additional_wall.setCoordinates(nbr_of_collumn, 0);
+		this.additional_wall.setCoordinates(nbr_of_row, 0);
 	}
 	
 	public Wall getWall(int x, int y){
@@ -286,7 +288,7 @@ public class Maze {
 		int x = (int) ((mouse_x - this.origin.getOX()) / (this.origin.getWidth()));
 		int y = (int) ((mouse_y - this.origin.getOY()) / (this.origin.getWidth()));
 		
-		if(x >= 0 && x < this.nbr_of_collumn && y >=0 && y < this.nbr_of_line){
+		if(x >= 0 && x < this.nbr_of_row && y >=0 && y < this.nbr_of_line){
 			return this.walls[x][y];
 		}
 		
@@ -294,7 +296,7 @@ public class Maze {
 	}
 	
 	public int getNumberOfCollumn(){
-		return this.nbr_of_collumn;
+		return this.nbr_of_row;
 	}
 	
 	public int getNumberOfLine(){
@@ -303,7 +305,7 @@ public class Maze {
 	
 	public void resetWeightGraph(){
 		
-		for(int i = 0; i < this.nbr_of_collumn; i++){
+		for(int i = 0; i < this.nbr_of_row; i++){
 			for(int j = 0; j < this.nbr_of_line; j++){
 				this.walls[i][j].resetVerticeWeight();
 			}
@@ -320,10 +322,10 @@ public class Maze {
 	
 	public Maze getCopyForAI(){
 		
-		Maze maze = new Maze(this.nbr_of_collumn, this.nbr_of_line, this.origin, this.textures);
+		Maze maze = new Maze(this.nbr_of_row, this.nbr_of_line, this.origin, this.textures);
 		
-		Wall[][] walls_copy = new Wall[this.nbr_of_collumn][this.nbr_of_line];
-		for(int i = 0; i < this.nbr_of_collumn; i++){
+		Wall[][] walls_copy = new Wall[this.nbr_of_row][this.nbr_of_line];
+		for(int i = 0; i < this.nbr_of_row; i++){
 			for(int j = 0; j < this.nbr_of_line; j++){
 				walls_copy[i][j] = walls[i][j].makeCopy();
 			}
@@ -345,25 +347,31 @@ public class Maze {
 		int y = (int) ((mouse_y - this.origin.getOY()) / (this.origin.getWidth()));
 
 		if(mode == Maze.MODE_CROSS){
-			if(x > 0 && x < this.nbr_of_collumn - 1 && x % 2 != 0){
+			if(x > 0 && x < this.nbr_of_row - 1 && x % 2 != 0){
 				for(int i = 0; i < this.nbr_of_line; i++){
 					this.walls[x][i].setHoovered(true);
 				}
 			}
 			if(y > 0 && y < this.nbr_of_line - 1 && y % 2 != 0){
-				for(int i = 0; i < this.nbr_of_collumn; i++){
+				for(int i = 0; i < this.nbr_of_row; i++){
 					this.walls[i][y].setHoovered(true);
 				}
 			}
 			
 		}else{
-			if(x >= 0 && x < this.nbr_of_collumn && y >=0 && y < this.nbr_of_line){
+			if(x >= 0 && x < this.nbr_of_row && y >=0 && y < this.nbr_of_line){
 				this.walls[x][y].setHoovered(true);
 			}
 		}
 		
 		
 	}
-	
 
+	public int getLineNumber(int mouse_y){
+		return (int) ((mouse_y - this.origin.getOY()) / (this.origin.getWidth()));
+	}
+	
+	public int getRowNumber(int mouse_x){
+		return (int) ((mouse_x - this.origin.getOX()) / (this.origin.getWidth()));
+	}
 }

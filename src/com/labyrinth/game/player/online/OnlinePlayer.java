@@ -6,7 +6,7 @@ import org.newdawn.slick.Graphics;
 import com.labyrinth.game.Origin;
 import com.labyrinth.game.maze.Wall;
 import com.labyrinth.game.player.Player;
-import com.labyrinth.game.player.PlayerListener;
+import com.labyrinth.game.player.PlayerEventListener;
 import com.labyrinth.gui.SpriteGUI;
 
 /**
@@ -16,7 +16,7 @@ import com.labyrinth.gui.SpriteGUI;
  */
 public class OnlinePlayer extends Player{
 
-	public OnlinePlayer(int player_id, String name, Origin origin, SpriteGUI textures, Wall start_position, PlayerListener listener) {
+	public OnlinePlayer(int player_id, String name, Origin origin, SpriteGUI textures, Wall start_position, PlayerEventListener listener) {
 		super(player_id, name, origin, textures, start_position, listener);
 		// TODO Auto-generated constructor stub
 	}
@@ -31,6 +31,11 @@ public class OnlinePlayer extends Player{
 	public void update(GameContainer gc) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	@Override
+	public int getTypeOfPlayer() {
+		return Player.ONLINE;
 	}
 
 }

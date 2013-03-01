@@ -6,7 +6,7 @@ import org.newdawn.slick.Input;
 
 import com.labyrinth.gui.SpriteGUI;
 
-public class SliderComponent extends MenuComponent {
+public class Slider extends MenuComponent {
 
 	private int max_value = 100;
 	private int cursor = 0;
@@ -16,7 +16,7 @@ public class SliderComponent extends MenuComponent {
 	private boolean visible = true;
 	private boolean enable = true;
 	
-	public SliderComponent(int id, int max_value, int value, SpriteGUI textures) {
+	public Slider(int id, int max_value, int value, SpriteGUI textures) {
 		super(id);
 		
 		this.textures_slider = textures;

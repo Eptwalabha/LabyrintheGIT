@@ -6,7 +6,7 @@ import com.labyrinth.game.Origin;
 import com.labyrinth.game.maze.Maze;
 import com.labyrinth.game.maze.Wall;
 import com.labyrinth.game.player.Player;
-import com.labyrinth.game.player.PlayerListener;
+import com.labyrinth.game.player.PlayerEventListener;
 import com.labyrinth.gui.SpriteGUI;
 
 public class AIPlayer extends Player implements Runnable{
@@ -14,7 +14,7 @@ public class AIPlayer extends Player implements Runnable{
 	private Maze maze;
 	private Maze maze_copy;
 	
-	public AIPlayer(int player_id, Origin origin, SpriteGUI textures, Wall start_position, PlayerListener listener, Maze maze) {
+	public AIPlayer(int player_id, Origin origin, SpriteGUI textures, Wall start_position, PlayerEventListener listener, Maze maze) {
 		super(player_id, "cpu " + player_id, origin, textures, start_position, listener);
 		this.maze = maze;
 	}
@@ -24,11 +24,13 @@ public class AIPlayer extends Player implements Runnable{
 	}
 
 	@Override
-	public void beginOfRound(){
-		super.beginOfRound();
+	public void setStep(int step){
+		super.setStep(step);
 		
-		Thread t = new Thread(this);
-		t.start();
+		if(step == 1){
+			Thread t = new Thread(this);
+			t.start();
+		}
 		
 	}
 	
@@ -45,12 +47,13 @@ public class AIPlayer extends Player implements Runnable{
 			timet = System.currentTimeMillis() - time;
 			
 			if(timet >= next_timet){
-				System.out.println(timet / 1000);
+				System.out.print(timet / 1000 + ", ");
 				next_timet += 1000;
 			}
 			
 		}while(timet < 5000);
 		
+		System.out.println("fin");
 		this.playerHasFinishedHisRound();
 		
 	}
@@ -61,6 +64,10 @@ public class AIPlayer extends Player implements Runnable{
 		
 	}
 	
+	@Override
+	public int getTypeOfPlayer() {
+		return Player.AI;
+	}
 
 
 }

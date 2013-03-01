@@ -1,8 +1,6 @@
 package com.labyrinth.menu.wheel;
 
-import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Input;
 
 import com.labyrinth.game.maze.Maze;
 import com.labyrinth.gui.SpriteGUI;
@@ -13,6 +11,10 @@ public class MenuWheel {
 	private int pos_x, pos_y;
 
 	private boolean visible = false;
+	private boolean top_enable = false;
+	private boolean bottom_enable = false;
+	private boolean left_enable = false;
+	private boolean right_enable = false;
 	
 	private SpriteGUI textures;
 	
@@ -25,6 +27,7 @@ public class MenuWheel {
 		this.visible = true;
 		this.old_pos_x = x;
 		this.old_pos_y = y;
+		
 	}
 	
 	public void render(Graphics arg2){
@@ -36,23 +39,70 @@ public class MenuWheel {
 		}
 		
 		for(int i = 0; i < 4; i++){
-			if(i == choosen){
-				tile = (int) (this.textures.getTileWidth() * 1.0);
-				this.textures.getSpriteAt(1, 0, tile, 90f * i).draw(this.old_pos_x - tile / 2.0f, this.old_pos_y - tile * this.textures.getTileRatio());
-				tile = (int) (this.textures.getTileWidth() * 0.8);
+			if(this.isArrowEnable(i)){
+				if(i == choosen){
+					tile = (int) (this.textures.getTileWidth() * 1.0);
+					this.textures.getSpriteAt(1, 0, tile, 90f * i).draw(this.old_pos_x - tile / 2.0f, this.old_pos_y - tile * this.textures.getTileRatio());
+					tile = (int) (this.textures.getTileWidth() * 0.8);
+				}else{
+					this.textures.getSpriteAt(0, 0, tile, 90f * i).draw(this.old_pos_x - tile / 2.0f, this.old_pos_y - tile * this.textures.getTileRatio());
+				}
 			}else{
-				this.textures.getSpriteAt(0, 0, tile, 90f * i).draw(this.old_pos_x - tile / 2.0f, this.old_pos_y - tile * this.textures.getTileRatio());
+				this.textures.getSpriteAt(2, 0, tile, 90f * i).draw(this.old_pos_x - tile / 2.0f, this.old_pos_y - tile * this.textures.getTileRatio());
 			}
 		}
 	}
 	
-	public void update(GameContainer arg0){
-		
-		if(this.visible){
-			Input i = arg0.getInput();
-			this.pos_x = i.getMouseX();
-			this.pos_y = i.getMouseY();
+	public void setLineEnable(boolean enable){
+		this.left_enable = enable;
+		this.right_enable = enable;
+	}
+	
+	public void setRowEnable(boolean enable){
+		this.top_enable = enable;
+		this.bottom_enable = enable;
+	}
+
+	public void setArrowEnable(int arrow, boolean enable){
+	
+		switch (arrow) {
+		case 0:
+			this.top_enable = enable;
+			break;
+		case 1:
+			this.right_enable = enable;
+			break;
+		case 2:
+			this.bottom_enable = enable;
+			break;
+		case 3:
+			this.left_enable = enable;
+			break;
+		default:
+			break;
 		}
+	}
+	
+	public boolean isArrowEnable(int arrow){
+
+		switch (arrow) {
+		case 0:
+			return this.top_enable;
+		case 1:
+			return this.right_enable;
+		case 2:
+			return this.bottom_enable;
+		case 3:
+			return this.left_enable;
+		default:
+			return false;
+		}
+	}
+	
+	public void update(int mouse_x, int mouse_y){
+		
+		this.pos_x = mouse_x;
+		this.pos_y = mouse_y;
 		
 	}
 	
@@ -63,7 +113,11 @@ public class MenuWheel {
 	public boolean isVisible(){
 		return this.visible;
 	}
-	
+
+	public void setVisible(boolean visible){
+		this.visible = visible;
+	}
+
 	public boolean hasChoosedADirection(){
 		
 		int abs_x = Math.abs(this.pos_x - this.old_pos_x);
