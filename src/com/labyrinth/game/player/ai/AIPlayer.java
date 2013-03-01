@@ -7,9 +7,16 @@ import com.labyrinth.game.maze.Maze;
 import com.labyrinth.game.maze.Wall;
 import com.labyrinth.game.player.Player;
 import com.labyrinth.game.player.PlayerEventListener;
+import com.labyrinth.game.player.ai.strategy.moveplayer.MovePlayerStrategy;
+import com.labyrinth.game.player.ai.strategy.movewall.MoveWallStrategy;
 import com.labyrinth.gui.SpriteGUI;
 
 public class AIPlayer extends Player implements Runnable{
+	
+	private MoveWallStrategy move_wall_strategy;
+	private MovePlayerStrategy move_player_strategy;
+	
+	private int ai_lvl = 0;
 	
 	private Maze maze;
 	private Maze maze_copy;
@@ -51,7 +58,7 @@ public class AIPlayer extends Player implements Runnable{
 				next_timet += 1000;
 			}
 			
-		}while(timet < 5000);
+		}while(timet < 3000);
 		
 		System.out.println("fin");
 		this.playerHasFinishedHisRound();

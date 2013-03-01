@@ -160,4 +160,8 @@ public abstract class Player {
 			p.playerHasFinishedHisRound(this.player_id);
 		}
 	}
+
+	public boolean completeAllObjectTives() {
+		return (this.objetive.size() == 0);
+	}
 }

@@ -11,6 +11,7 @@ import com.labyrinth.game.player.ai.AIPlayer;
 import com.labyrinth.game.player.human.HumanPlayer;
 import com.labyrinth.gui.SpriteGUI;
 
+import java.awt.Font;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +24,7 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.MouseListener;
 import org.newdawn.slick.SlickException;
+import org.newdawn.slick.TrueTypeFont;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 
@@ -31,8 +33,9 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 	public final static int STEP_WAIT = 0;
 	public final static int STEP_MOVE_WALL = 1;
 	public final static int STEP_MOVE_PLAYER = 2;
+	public final static int STEP_END_GAME = 3;
 	
-	
+	private boolean end_game = false;
 	private boolean right_mouse_button;
 	private SpriteGUI objective_textures;
 	
@@ -49,6 +52,9 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 	private int last_line = -1, last_row = -1, last_direction= -1;
 	
 	private Input input;
+	
+	
+	private TrueTypeFont ttf;
 	
 	@Override
 	public void init(GameContainer arg0, StateBasedGame arg1)
@@ -114,6 +120,9 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 		this.players.get(this.current_player).setStep(GameBoard.STEP_MOVE_WALL);
 		this.players.get(this.current_player).getPlayerObjective().active(true);
 
+		Font f = new Font("Times new roman", Font.BOLD , 20);
+		this.ttf = new TrueTypeFont(f, true);
+		
 	}
 	
 	private int generateUniqueId(){
@@ -166,12 +175,17 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 			if(o != null){
 				if(p.getPosition() == o.getPosition()){
 					p.nextObjective();
+					if(p.completeAllObjectTives()) this.endGame();
 				}
 			}
 		}
 		
 	}
 	
+	private void endGame() {
+		this.end_game = true;
+	}
+
 	private void checkIfPlayerPushed(Wall old){
 
 		Wall last = this.maze.getAdditionalWall();
@@ -183,6 +197,20 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 
 	}
 	
+	private void checkLastWallMove(int row, int line) {
+		
+		if(this.last_direction == Maze.INSERT_FROM_BOTTOM || this.last_direction == Maze.INSERT_FROM_TOP){
+			if(row == this.last_row){
+				((CursorMoveWall) this.cursor_move_wall).setArrowEnable((this.last_direction + 2) % 2, false);
+			}
+		}else if(this.last_direction == Maze.INSERT_FROM_LEFT || this.last_direction == Maze.INSERT_FROM_RIGHT){
+			if(line == this.last_line){
+				((CursorMoveWall) this.cursor_move_wall).setArrowEnable(this.last_direction, false);
+			}
+		}
+		
+	}
+
 	@Override
 	public void render(GameContainer arg0, StateBasedGame arg1, Graphics g)
 			throws SlickException {
@@ -202,13 +230,13 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 		g.setColor(Color.red);
 		g.drawLine(300, 0, 300, arg0.getHeight());
 		g.setColor(Color.white);
-		g.drawString("Tab \nFaire pivoter le mur", 25, 350);
+		this.ttf.drawString(25, 350, "Tab \nFaire pivoter le mur", Color.white);
 		int pos = 400;
 		for(Player j : players){
-			g.drawString("Joueur " + (j.getPlayerPosition() + 1) + ": " + j.getPlayerScore() + " point(s)", 25, pos);
+			String s = "Joueur " + (j.getPlayerPosition() + 1) + ": " + j.getPlayerScore() + " point(s)";
+			this.ttf.drawString(25, pos, s, Color.green);
 			pos += 25;
 		}
-		g.drawString("Tab \nFaire pivoter le mur", 25, 350);
 		
 
 	}
@@ -217,45 +245,47 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 	public void update(GameContainer arg0, StateBasedGame arg1, int arg2)
 			throws SlickException {
 		
-		this.origin.setBounds(300, 0,
-				arg0.getWidth() - 300, arg0.getHeight(),
-				this.maze.getNumberOfCollumn() * this.origin.getWidth(),
-				this.maze.getNumberOfLine() * this.origin.getWidth());
-		
-		Input in = arg0.getInput();
-
-		if(in.isKeyDown(Input.KEY_LEFT)){
-			this.origin.setOriginPosition(this.origin.getOX() - 5, this.origin.getOY());
-		}
-		if(in.isKeyDown(Input.KEY_RIGHT)){
-			this.origin.setOriginPosition(this.origin.getOX() + 5, this.origin.getOY());
-		}
-		if(in.isKeyDown(Input.KEY_UP)){
-			this.origin.setOriginPosition(this.origin.getOX(), this.origin.getOY() - 5);
-		}
-		if(in.isKeyDown(Input.KEY_DOWN)){
-			this.origin.setOriginPosition(this.origin.getOX(), this.origin.getOY() + 5);
-		}
-		
-		for(Player p: players){
-			p.update(arg0);
-			if(p.isMoving()){
-				p.move();
-				this.checkObjectives();
+		if(!this.end_game){
+			this.origin.setBounds(300, 0,
+					arg0.getWidth() - 300, arg0.getHeight(),
+					this.maze.getNumberOfCollumn() * this.origin.getWidth(),
+					this.maze.getNumberOfLine() * this.origin.getWidth());
+			
+			Input in = arg0.getInput();
+	
+			if(in.isKeyDown(Input.KEY_LEFT)){
+				this.origin.setOriginPosition(this.origin.getOX() - 5, this.origin.getOY());
 			}
+			if(in.isKeyDown(Input.KEY_RIGHT)){
+				this.origin.setOriginPosition(this.origin.getOX() + 5, this.origin.getOY());
+			}
+			if(in.isKeyDown(Input.KEY_UP)){
+				this.origin.setOriginPosition(this.origin.getOX(), this.origin.getOY() - 5);
+			}
+			if(in.isKeyDown(Input.KEY_DOWN)){
+				this.origin.setOriginPosition(this.origin.getOX(), this.origin.getOY() + 5);
+			}
+			
+			for(Player p: players){
+				p.update(arg0);
+				if(p.isMoving()){
+					p.move();
+					this.checkObjectives();
+				}
+			}
+			
+			if(in.isKeyPressed(Input.KEY_TAB)){
+				this.maze.rotateAdditionalWall(Wall.TO_THE_RIGHT);
+			}
+			
+			if(in.isKeyPressed(Input.KEY_SPACE)) this.maze.shakeWall();
+	
+			if(in.isKeyPressed(Input.KEY_ENTER)){
+				this.players.get(this.current_player).setNewDestination(null);
+			}
+	
+			if(in.isKeyPressed(Input.KEY_G)) this.printGraph();
 		}
-		
-		if(in.isKeyPressed(Input.KEY_TAB)){
-			this.maze.rotateAdditionalWall(Wall.TO_THE_RIGHT);
-		}
-		
-		if(in.isKeyPressed(Input.KEY_SPACE)) this.maze.shakeWall();
-
-		if(in.isKeyPressed(Input.KEY_ENTER)){
-			this.players.get(this.current_player).setNewDestination(null);
-		}
-
-		if(in.isKeyPressed(Input.KEY_G)) this.printGraph();
 	}
 	
 	@Override
@@ -397,6 +427,7 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 						int row = this.maze.getRowNumber(mouse_x);
 						((CursorMoveWall) this.cursor_move_wall).setLineEnable(line % 2 != 0);
 						((CursorMoveWall) this.cursor_move_wall).setRowEnable(row % 2 != 0);
+						this.checkLastWallMove(row, line);
 					}
 					break;
 				case GameBoard.STEP_MOVE_PLAYER:
