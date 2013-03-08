@@ -7,6 +7,8 @@ import com.labyrinth.game.maze.Maze;
 import com.labyrinth.game.maze.Wall;
 import com.labyrinth.game.player.Player;
 import com.labyrinth.game.player.PlayerEventListener;
+import com.labyrinth.game.player.PlayerMovement;
+import com.labyrinth.game.player.WallMovement;
 import com.labyrinth.game.player.ai.AIPlayer;
 import com.labyrinth.game.player.human.HumanPlayer;
 import com.labyrinth.gui.SpriteGUI;
@@ -79,21 +81,21 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 		
 		this.input = arg0.getInput();
 		
-		Player p1 = new HumanPlayer(this.generateUniqueId(), "test", this.origin, player_texture, this.maze.getWall(0, 0), this);
+		Player p1 = new HumanPlayer(this.generateUniqueId(), "Joueur Bleu", this.origin, player_texture, this.maze.getWall(0, 0), this);
 		p1.setPlayerPosition(0);
 		input.addMouseListener((MouseListener) p1);
 		this.players.add(p1);
 		
-		Player p2 = new HumanPlayer(this.generateUniqueId(), "test2", this.origin, player_texture, this.maze.getWall(this.maze.getNumberOfCollumn() - 1, this.maze.getNumberOfLine() - 1), this);
+		Player p2 = new HumanPlayer(this.generateUniqueId(), "Joueur Rouge", this.origin, player_texture, this.maze.getWall(this.maze.getNumberOfCollumn() - 1, this.maze.getNumberOfLine() - 1), this);
 		p2.setPlayerPosition(1);
 		input.addMouseListener((MouseListener) p2);
 		this.players.add(p2);
 		
-		Player p3 = new AIPlayer(this.generateUniqueId(), this.origin, player_texture, this.maze.getWall(this.maze.getNumberOfCollumn() - 1, 0), this, this.maze);
+		Player p3 = new AIPlayer(this.generateUniqueId(), this.origin, player_texture, this.maze.getWall(this.maze.getNumberOfCollumn() - 1, 0), this, this.maze, AIPlayer.AI_HARD);
 		p3.setPlayerPosition(2);
 		this.players.add(p3);
 		
-		this.current_player = 0;
+		this.current_player = 2;
 		
 		int mx = this.maze.getNumberOfCollumn();
 		int my = this.maze.getNumberOfLine();
@@ -138,7 +140,7 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 			}
 		}while(exist != 0);
 		
-		System.out.println("id généré: " + result);
+		System.out.println("id généné: " + result);
 		return result;
 	}
 
@@ -199,16 +201,40 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 	
 	private void checkLastWallMove(int row, int line) {
 		
-		if(this.last_direction == Maze.INSERT_FROM_BOTTOM || this.last_direction == Maze.INSERT_FROM_TOP){
-			if(row == this.last_row){
-				((CursorMoveWall) this.cursor_move_wall).setArrowEnable((this.last_direction + 2) % 2, false);
+		if(this.last_direction >= 0){
+			
+			if(this.last_direction % 2 == 0 && row == this.last_row){
+				((CursorMoveWall) this.cursor_move_wall).setArrowEnable((this.last_direction + 2) % 4, false);
 			}
-		}else if(this.last_direction == Maze.INSERT_FROM_LEFT || this.last_direction == Maze.INSERT_FROM_RIGHT){
-			if(line == this.last_line){
-				((CursorMoveWall) this.cursor_move_wall).setArrowEnable(this.last_direction, false);
+			
+			if(this.last_direction % 2 > 0 && line == this.last_line){
+				((CursorMoveWall) this.cursor_move_wall).setArrowEnable((this.last_direction + 2) % 4, false);
 			}
+			
+		}
+	
+//		System.out.println("dir = " + this.last_direction);
+//		if(this.last_direction == Maze.INSERT_FROM_BOTTOM || this.last_direction == Maze.INSERT_FROM_TOP){
+//			if(row == this.last_row){
+//				((CursorMoveWall) this.cursor_move_wall).setArrowEnable((this.last_direction + 2) % 2, false);
+//			}
+//		}else if(this.last_direction == Maze.INSERT_FROM_LEFT || this.last_direction == Maze.INSERT_FROM_RIGHT){
+//			if(line == this.last_line){
+//				((CursorMoveWall) this.cursor_move_wall).setArrowEnable(this.last_direction, false);
+//			}
+//		}
+		
+	}
+	
+	private boolean isALegalMove(int row, int line, int direction){
+		
+		if(this.last_direction >= 0 && (direction + 2) % 4 == this.last_direction){
+			
+			if(this.last_direction % 2 == 0 && row == this.last_row) return false;
+			if(this.last_direction % 2 > 0 && line == this.last_line) return false;
 		}
 		
+		return true;
 	}
 
 	@Override
@@ -238,9 +264,36 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 			pos += 25;
 		}
 		
+		String explications = this.getExplanations();
+		
+		this.ttf.drawString(310, 10, explications, Color.red);
+		
 
 	}
 
+	private String getExplanations(){
+		String result = "";
+		
+		result = this.players.get(this.current_player).getPlayerName();
+		
+		result += ", c'est ton tour (";
+		
+		switch (this.players.get(this.current_player).getStep()) {
+		case 1:
+			result += "pousse un mur!";
+			break;
+		case 2:
+			result += "déplace toi!";
+			break;
+		default:
+			break;
+		}
+		
+		result += ")";
+		
+		return result;
+	}
+	
 	@Override
 	public void update(GameContainer arg0, StateBasedGame arg1, int arg2)
 			throws SlickException {
@@ -345,15 +398,36 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 	}
 
 	@Override
-	public boolean playerWantsToPushWallAt(int id_player, int mouse_x, int mouse_y, int direction) {
+	public boolean playerWantsToPushWall(int id_player, WallMovement wall_movement) {
+
 		if(this.isTheCurrentPlayer(id_player)){
-			
+
+			int row = wall_movement.getRowNumber();
+			int line = wall_movement.getLineNumber();
+			int direction = wall_movement.getDirection();
+
+			if(this.maze.isALegalMove(row, line, direction) && this.isALegalMove(row, line, direction)){
+				
+				this.last_row = row;
+				this.last_line = line;
+				this.last_direction = direction;
+	
+				Wall old = this.maze.getAdditionalWall();
+				this.maze.insertWallHere(row, line, direction);
+				this.checkIfPlayerPushed(old);
+				
+				this.players.get(this.current_player).setStep(GameBoard.STEP_MOVE_PLAYER);
+				this.checkObjectives();
+				
+				return true;
+			}
+
 		}
 		return false;
 	}
 
 	@Override
-	public boolean playerWantsToMoveAt(int id_player, int mouse_x, int mouse_y) {
+	public boolean playerWantsToMove(int id_player, PlayerMovement player_movement) {
 		if(this.isTheCurrentPlayer(id_player)){
 	
 		}
@@ -378,16 +452,23 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 	public void playerClicksToPushWall(int id_player, int mouse_x, int mouse_y, int direction) {
 		if(this.isTheCurrentPlayer(id_player)){
 			
-			this.last_line = this.maze.getLineNumber(mouse_y);
-			this.last_row = this.maze.getRowNumber(mouse_x);
-			this.last_direction = direction;
+			int row = this.maze.getRowNumber(mouse_x);
+			int line = this.maze.getLineNumber(mouse_y);
 			
-			Wall old = this.maze.getAdditionalWall();
-			this.maze.insertWallHere(mouse_x, mouse_y, direction);
-			this.checkIfPlayerPushed(old);
-			
-			this.players.get(this.current_player).setStep(GameBoard.STEP_MOVE_PLAYER);
-			this.checkObjectives();
+			if(this.maze.isALegalMove(row, line, direction) && this.isALegalMove(row, line, direction)){
+
+				this.last_row = row;
+				this.last_line = line;
+				this.last_direction = direction;
+				
+				Wall old = this.maze.getAdditionalWall();
+				this.maze.insertWallHere(row, line, direction);
+				this.checkIfPlayerPushed(old);
+					
+				this.players.get(this.current_player).setStep(GameBoard.STEP_MOVE_PLAYER);
+				this.checkObjectives();
+				
+			}
 		}
 	}
 
@@ -406,7 +487,6 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 			}
 		}
 	}
-	
 
 	@Override
 	public void highLight(int mouse_x, int mouse_y, int mode) {

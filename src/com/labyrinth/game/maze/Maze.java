@@ -207,47 +207,42 @@ public class Maze {
 
 	}
 	
-	public void insertWallHere(int mouse_x, int mouse_y, int mode){
-		
-		int coll = this.getRowNumber(mouse_x);
-//		(int) ((mouse_x - this.origin.getOX()) / (this.origin.getWidth()));
-		int line = this.getLineNumber(mouse_y);
-//		(int) ((mouse_y - this.origin.getOY()) / (this.origin.getWidth()));
-		
-		if(mode == INSERT_FROM_BOTTOM || mode == INSERT_FROM_TOP){
-			if(coll < this.nbr_of_row && coll >= 0 && coll % 2 != 0){
-				Wall temp = (mode == INSERT_FROM_BOTTOM) ? this.walls[coll][0] : this.walls[coll][this.nbr_of_line - 1];
+	public void insertWallHere(int row, int line, int direction){
+				
+		if(direction == INSERT_FROM_BOTTOM || direction == INSERT_FROM_TOP){
+			if(row < this.nbr_of_row && row >= 0 && row % 2 != 0){
+				Wall temp = (direction == INSERT_FROM_BOTTOM) ? this.walls[row][0] : this.walls[row][this.nbr_of_line - 1];
 				for(int i = 0; i < this.nbr_of_line; i++){
-					if(mode == INSERT_FROM_BOTTOM){
+					if(direction == INSERT_FROM_BOTTOM){
 						if(i < this.nbr_of_line - 1){
-							this.walls[coll][i] = this.walls[coll][i + 1];
-							this.walls[coll][i].setCoordinates(coll, i);
+							this.walls[row][i] = this.walls[row][i + 1];
+							this.walls[row][i].setCoordinates(row, i);
 						}
 					}else{
 						if(nbr_of_line - 1 - i > 0){
-							this.walls[coll][nbr_of_line - 1 - i] = this.walls[coll][nbr_of_line - 2 - i];
-							this.walls[coll][nbr_of_line - 1 - i].setCoordinates(coll, nbr_of_line - 1 - i);
+							this.walls[row][nbr_of_line - 1 - i] = this.walls[row][nbr_of_line - 2 - i];
+							this.walls[row][nbr_of_line - 1 - i].setCoordinates(row, nbr_of_line - 1 - i);
 						}
 					}
 				}
-				if(mode == INSERT_FROM_BOTTOM){
-					this.walls[coll][this.nbr_of_line - 1] = this.additional_wall;
-					this.walls[coll][nbr_of_line - 1].setCoordinates(coll, nbr_of_line - 1);
+				if(direction == INSERT_FROM_BOTTOM){
+					this.walls[row][this.nbr_of_line - 1] = this.additional_wall;
+					this.walls[row][nbr_of_line - 1].setCoordinates(row, nbr_of_line - 1);
 				}else{
-					this.walls[coll][0] = this.additional_wall;
-					this.walls[coll][0].setCoordinates(coll, 0);
+					this.walls[row][0] = this.additional_wall;
+					this.walls[row][0].setCoordinates(row, 0);
 				}
 				this.additional_wall = temp;
 				this.wall_moving = true;
 				this.wall_moving_start_time = System.currentTimeMillis();
-				this.wall_moving_direction = mode;
-				this.wall_moving_index = coll;
+				this.wall_moving_direction = direction;
+				this.wall_moving_index = row;
 			} 
 		}else{
 			if(line < this.nbr_of_line && line >= 0  && line % 2 != 0){
-				Wall temp = (mode == INSERT_FROM_RIGHT) ? this.walls[0][line] : this.walls[this.nbr_of_row - 1][line];
+				Wall temp = (direction == INSERT_FROM_RIGHT) ? this.walls[0][line] : this.walls[this.nbr_of_row - 1][line];
 				for(int i = 0; i < this.nbr_of_row; i++){
-					if(mode == INSERT_FROM_RIGHT){
+					if(direction == INSERT_FROM_RIGHT){
 						if(i < this.nbr_of_row - 1){
 							this.walls[i][line] = this.walls[i + 1][line];
 							this.walls[i][line].setCoordinates(i, line);
@@ -259,7 +254,7 @@ public class Maze {
 						}
 					}
 				}
-				if(mode == INSERT_FROM_RIGHT){
+				if(direction == INSERT_FROM_RIGHT){
 					this.walls[this.nbr_of_line - 1][line] = this.additional_wall;
 					this.walls[this.nbr_of_line - 1][line].setCoordinates(this.nbr_of_line - 1, line);
 				}else{
@@ -269,7 +264,7 @@ public class Maze {
 				this.additional_wall = temp;
 				this.wall_moving = true;
 				this.wall_moving_start_time = System.currentTimeMillis();
-				this.wall_moving_direction = mode;
+				this.wall_moving_direction = direction;
 				this.wall_moving_index = line;
 			} 
 		}
@@ -278,7 +273,7 @@ public class Maze {
 		
 		this.additional_wall.setCoordinates(nbr_of_row, 0);
 	}
-	
+
 	public Wall getWall(int x, int y){
 		return this.walls[x][y];
 	}
@@ -367,6 +362,17 @@ public class Maze {
 		
 	}
 
+	public boolean isALegalMove(int row, int line, int direction){
+	
+		if(direction % 2 > 0){
+			if(row < 0 || row >= this.nbr_of_row || line % 2 == 0) return false;
+		}else{
+			if(line < 0 || line >= this.nbr_of_line || row % 2 == 0) return false;
+		}
+		
+		return true;
+	}
+	
 	public int getLineNumber(int mouse_y){
 		return (int) ((mouse_y - this.origin.getOY()) / (this.origin.getWidth()));
 	}

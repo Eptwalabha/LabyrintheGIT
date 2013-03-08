@@ -7,23 +7,41 @@ import com.labyrinth.game.maze.Maze;
 import com.labyrinth.game.maze.Wall;
 import com.labyrinth.game.player.Player;
 import com.labyrinth.game.player.PlayerEventListener;
-import com.labyrinth.game.player.ai.strategy.moveplayer.MovePlayerStrategy;
-import com.labyrinth.game.player.ai.strategy.movewall.MoveWallStrategy;
+import com.labyrinth.game.player.WallMovement;
+import com.labyrinth.game.player.ai.strategy.AIEasyStrategy;
+import com.labyrinth.game.player.ai.strategy.AIHardStrategy;
+import com.labyrinth.game.player.ai.strategy.AIMediumStrategy;
+import com.labyrinth.game.player.ai.strategy.AIStrategy;
 import com.labyrinth.gui.SpriteGUI;
 
 public class AIPlayer extends Player implements Runnable{
 	
-	private MoveWallStrategy move_wall_strategy;
-	private MovePlayerStrategy move_player_strategy;
+	public final static int AI_EASY = 0;
+	public final static int AI_MEDIUM = 1;
+	public final static int AI_HARD = 2;
+	
+	private AIStrategy playing_strategy;
 	
 	private int ai_lvl = 0;
 	
 	private Maze maze;
 	private Maze maze_copy;
 	
-	public AIPlayer(int player_id, Origin origin, SpriteGUI textures, Wall start_position, PlayerEventListener listener, Maze maze) {
+	public AIPlayer(int player_id, Origin origin, SpriteGUI textures, Wall start_position, PlayerEventListener listener, Maze maze, int ai_lvl) {
 		super(player_id, "cpu " + player_id, origin, textures, start_position, listener);
 		this.maze = maze;
+		this.maze_copy = this.maze.getCopyForAI();
+		this.ai_lvl = ai_lvl;
+		
+		this.playing_strategy = new AIEasyStrategy(this.maze_copy, this.getPosition(), this.getPlayerObjective());
+		
+		if(this.ai_lvl > AI_EASY){
+			this.playing_strategy = new AIMediumStrategy(this.playing_strategy);
+			
+			if(this.ai_lvl > AI_MEDIUM){
+				this.playing_strategy = new AIHardStrategy(this.playing_strategy);
+			}
+		}
 	}
 	
 	public void newRound(){
@@ -46,6 +64,8 @@ public class AIPlayer extends Player implements Runnable{
 		
 		this.maze_copy = this.maze.getCopyForAI();
 		
+		this.playing_strategy.processSolutions();
+		
 		long time = System.currentTimeMillis();
 		long timet;
 		long next_timet = 1000;
@@ -58,9 +78,18 @@ public class AIPlayer extends Player implements Runnable{
 				next_timet += 1000;
 			}
 			
-		}while(timet < 3000);
+		}while(timet < 2000);
 		
-		System.out.println("fin");
+		int id = this.getPlayerId();
+		int row, line, direction;
+		
+		do{
+			row = (int) (Math.random() * this.maze.getNumberOfCollumn());
+			line = (int) (Math.random() * this.maze.getNumberOfLine());
+			direction = (int) (Math.random() * 4);
+			System.out.println("demande de déplacement de mur (random)");
+		}while(!this.listeners.get(0).playerWantsToPushWall(id, new WallMovement(row, line, direction)));
+		
 		this.playerHasFinishedHisRound();
 		
 	}

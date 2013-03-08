@@ -6,9 +6,9 @@ public interface PlayerEventListener {
 	
 	public void playerClicksToMove(int id_player, int mouse_x, int mouse_y);
 
-	public boolean playerWantsToPushWallAt(int id_player, int row, int line, int direction);
+	public boolean playerWantsToPushWall(int id_player, WallMovement wall_movement);
 	
-	public boolean playerWantsToMoveAt(int id_player, int row, int line);
+	public boolean playerWantsToMove(int id_player, PlayerMovement player_movement);
 	
 	public void playerWantsToRotateAdditionalWall(int id_player, int mode);
 	

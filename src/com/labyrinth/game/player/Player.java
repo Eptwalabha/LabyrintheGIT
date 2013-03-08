@@ -3,6 +3,7 @@ package com.labyrinth.game.player;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 
@@ -32,6 +33,7 @@ public abstract class Player {
 	private int player_id;
 	private int step;
 	private long time_next_move = 0;
+	private Color player_color;
 	
 	public Player(int player_id, String name, Origin origin, SpriteGUI textures, Wall start_position, PlayerEventListener listener){
 		
