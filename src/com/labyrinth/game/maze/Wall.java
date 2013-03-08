@@ -1,6 +1,7 @@
 package com.labyrinth.game.maze;
 
 import com.labyrinth.gui.SpriteGUI;
+import com.labyrinth.utils.graph.Coordinate2D;
 import com.labyrinth.utils.graph.GraphVertex;
 
 public class Wall extends GraphVertex{
@@ -67,6 +68,10 @@ public class Wall extends GraphVertex{
 		return this.coordinates_y;
 	}
 	
+	public Coordinate2D getCoordinate2D(){
+		return new Coordinate2D(this.coordinates_x, this.coordinates_y);
+	}
+	
 	public void setPosition(int x, int y){
 		this.pos_x = x;
 		this.pos_y = y;
@@ -101,9 +106,9 @@ public class Wall extends GraphVertex{
 //		this.render_size = render_size;
 	}
 	
-	public void setVertice(Wall vertice){
-		this.setBrother(vertice.getVerticeBrother());
-		this.setSon((Wall) vertice.getVerticeSon());
+	public void setVertice(Wall vertex){
+		this.setBrother(vertex.getBrother());
+		this.setSon((Wall) vertex.getSon());
 	}
 	
 	public int getWallType(){

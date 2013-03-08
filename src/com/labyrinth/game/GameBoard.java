@@ -81,19 +81,31 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 		
 		this.input = arg0.getInput();
 		
-		Player p1 = new HumanPlayer(this.generateUniqueId(), "Joueur Bleu", this.origin, player_texture, this.maze.getWall(0, 0), this);
+//		Player p1 = new HumanPlayer(this.generateUniqueId(), "Joueur Bleu", this.origin, player_texture, this.maze.getWall(0, 0), this);
+//		p1.setPlayerPosition(0);
+//		input.addMouseListener((MouseListener) p1);
+//		this.players.add(p1);
+//		
+//		Player p2 = new HumanPlayer(this.generateUniqueId(), "Joueur Rouge", this.origin, player_texture, this.maze.getWall(this.maze.getNumberOfCollumn() - 1, this.maze.getNumberOfLine() - 1), this);
+//		p2.setPlayerPosition(1);
+//		input.addMouseListener((MouseListener) p2);
+//		this.players.add(p2);
+
+		Player p1 = new AIPlayer(this.generateUniqueId(), this.origin, player_texture, this.maze.getWall(0, 0), this, this.maze, AIPlayer.AI_HARD);
 		p1.setPlayerPosition(0);
-		input.addMouseListener((MouseListener) p1);
 		this.players.add(p1);
-		
-		Player p2 = new HumanPlayer(this.generateUniqueId(), "Joueur Rouge", this.origin, player_texture, this.maze.getWall(this.maze.getNumberOfCollumn() - 1, this.maze.getNumberOfLine() - 1), this);
+
+		Player p2 = new AIPlayer(this.generateUniqueId(), this.origin, player_texture, this.maze.getWall(this.maze.getNumberOfCollumn() - 1, this.maze.getNumberOfLine() - 1), this, this.maze, AIPlayer.AI_HARD);
 		p2.setPlayerPosition(1);
-		input.addMouseListener((MouseListener) p2);
 		this.players.add(p2);
-		
+
 		Player p3 = new AIPlayer(this.generateUniqueId(), this.origin, player_texture, this.maze.getWall(this.maze.getNumberOfCollumn() - 1, 0), this, this.maze, AIPlayer.AI_HARD);
 		p3.setPlayerPosition(2);
 		this.players.add(p3);
+
+		Player p4 = new AIPlayer(this.generateUniqueId(), this.origin, player_texture, this.maze.getWall(0, this.maze.getNumberOfLine() - 1), this, this.maze, AIPlayer.AI_HARD);
+		p4.setPlayerPosition(3);
+		this.players.add(p4);
 		
 		this.current_player = 2;
 		
@@ -408,6 +420,8 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 
 			if(this.maze.isALegalMove(row, line, direction) && this.isALegalMove(row, line, direction)){
 				
+				this.endAnimations();
+				
 				this.last_row = row;
 				this.last_line = line;
 				this.last_direction = direction;
@@ -430,6 +444,22 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 	public boolean playerWantsToMove(int id_player, PlayerMovement player_movement) {
 		if(this.isTheCurrentPlayer(id_player)){
 	
+			int row = player_movement.getRowNumber();
+			int line = player_movement.getLineNumber();
+			
+			Wall dest = this.maze.getWallAt(row, line);
+			
+			if(dest != null){
+				this.maze.resetWeightGraph();
+				GraphVertex path = this.players.get(this.current_player).getPosition().getShortestPathRecursive(dest);
+				if(path != null){
+					
+					this.endAnimations();
+					this.players.get(this.current_player).setNewDestination(path);
+					this.nextPlayer();
+					return true;
+				}
+			}
 		}
 		return false;
 	}
@@ -457,6 +487,8 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 			
 			if(this.maze.isALegalMove(row, line, direction) && this.isALegalMove(row, line, direction)){
 
+				this.endAnimations();
+				
 				this.last_row = row;
 				this.last_line = line;
 				this.last_direction = direction;
@@ -475,12 +507,18 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 	@Override
 	public void playerClicksToMove(int id_player, int mouse_x, int mouse_y) {
 		if(this.isTheCurrentPlayer(id_player)){
-			Wall dest = this.maze.getWallAt(mouse_x, mouse_y);
 			
-			if(dest != null){			
+			int row = this.maze.getRowNumber(mouse_x);
+			int line = this.maze.getLineNumber(mouse_y);
+			
+			Wall dest = this.maze.getWallAt(row, line);
+			
+			if(dest != null){
 				this.maze.resetWeightGraph();
 				GraphVertex path = this.players.get(this.current_player).getPosition().getShortestPathRecursive(dest);
 				if(path != null){
+					
+					this.endAnimations();
 					this.players.get(this.current_player).setNewDestination(path);
 					this.nextPlayer();
 				}
@@ -568,4 +606,12 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 		
 	}
 
+	private void endAnimations(){
+		
+		for(int i = 0; i < this.players.size(); i++){
+			if(i != this.current_player){
+				this.players.get(i).finishYourMove();
+			}
+		}
+	}
 }

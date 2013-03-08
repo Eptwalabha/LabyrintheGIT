@@ -90,14 +90,22 @@ public abstract class Player {
 	public void move(){
 		long t = System.currentTimeMillis();
 		if(t >= this.time_next_move){
-			this.position = (Wall) path.getVerticeSon();
-			if(path.getVerticeBrother() != null){
-				path = path.getVerticeBrother();
+			this.position = (Wall) path.getSon();
+			if(path.getBrother() != null){
+				path = path.getBrother();
 				this.time_next_move = t + 200;
 			}else{
 				path = null;
 			}
 		}
+	}
+	
+	public void finishYourMove(){
+		
+		if(this.path != null){
+			this.position = (Wall) path.getBrother(this.path.countBrother() - 1).getSon();
+		}
+		
 	}
 	
 	public GraphVertex getPath() {

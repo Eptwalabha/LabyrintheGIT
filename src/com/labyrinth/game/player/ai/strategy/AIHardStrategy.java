@@ -9,7 +9,6 @@ public class AIHardStrategy extends AIStrategyDecorator {
 	@Override
 	public void processSolutions(){
 		super.processSolutions();
-		System.out.println("hard");
 		
 	}
 

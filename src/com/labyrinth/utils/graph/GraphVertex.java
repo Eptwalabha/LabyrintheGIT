@@ -37,15 +37,29 @@ public class GraphVertex {
 		return this.name;
 	}
 	
-	public GraphVertex getVerticeBrother(){
+	public GraphVertex getBrother(){
 		return this.brother;
 	}
 	
-	public GraphVertex getVerticeSon(){
+	public GraphVertex getBrother(int position){
+		
+		if(position == 0){
+			return this;
+		}else{
+			if(this.brother != null){
+				return this.brother.getBrother(position - 1);
+			}else{
+				return null;
+			}
+		}
+		
+	}
+	
+	public GraphVertex getSon(){
 		return this.son;
 	}
 	
-	public int getVerticeValue(){
+	public int getVertexValue(){
 		return this.weight_value;
 	}
 	
@@ -117,12 +131,12 @@ public class GraphVertex {
 			
 			if(this.brother != null){
 				path_brother = this.brother.getShortestPathRecursive(last_vertex, path_weight, false);
-				if(path_brother != null) poid_chemin_frere = last_vertex.getVerticeValue();
+				if(path_brother != null) poid_chemin_frere = last_vertex.getVertexValue();
 			}
 			
 			if(this.son != null){
 				chemin_fils = this.son.getShortestPathRecursive(last_vertex, path_weight + this.weight_to_son, true);
-				if(chemin_fils != null) poid_chemin_fils = last_vertex.getVerticeValue();
+				if(chemin_fils != null) poid_chemin_fils = last_vertex.getVertexValue();
 			}
 			
 			if(chemin_fils != null || path_brother != null){
@@ -164,6 +178,40 @@ public class GraphVertex {
 		}
 		
 		return null;
+	}
+	
+	public GraphVertex getAllVerticesConnectedTo(){
+		
+		GraphVertex list = new GraphVertex(null, null);
+		
+		this.getAllVerticesConnectedTo(list, true);
+		
+		return list;
+	}
+	
+	
+	private void getAllVerticesConnectedTo(GraphVertex list, boolean this_vertex_is_a_son){
+
+		if(!this.visited){
+			
+			if(this_vertex_is_a_son){
+				this.visited = true;
+				list.stack(this);
+			}
+			
+			if(this.brother != null) this.brother.getAllVerticesConnectedTo(list, false);
+			if(this.son != null) this.son.getAllVerticesConnectedTo(list, true);
+		}
+	}
+	
+	public int countBrother(){
+		
+		if(this.brother == null){
+			return 1;
+		}else{
+			return 1 + this.brother.countBrother();
+		}
+		
 	}
 	
 	// type = 0 pour racine; 1 pour fils; 2 pour frere.

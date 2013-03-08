@@ -278,13 +278,10 @@ public class Maze {
 		return this.walls[x][y];
 	}
 	
-	public Wall getWallAt(int mouse_x, int mouse_y){
+	public Wall getWallAt(int row, int line){
 		
-		int x = (int) ((mouse_x - this.origin.getOX()) / (this.origin.getWidth()));
-		int y = (int) ((mouse_y - this.origin.getOY()) / (this.origin.getWidth()));
-		
-		if(x >= 0 && x < this.nbr_of_row && y >=0 && y < this.nbr_of_line){
-			return this.walls[x][y];
+		if(row >= 0 && row < this.nbr_of_row && line >=0 && line < this.nbr_of_line){
+			return this.walls[row][line];
 		}
 		
 		return null;

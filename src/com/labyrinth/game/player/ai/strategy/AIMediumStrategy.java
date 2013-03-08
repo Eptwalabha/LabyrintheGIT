@@ -9,7 +9,6 @@ public class AIMediumStrategy extends AIStrategyDecorator{
 	@Override
 	public void processSolutions(){
 		super.processSolutions();
-		System.out.println("medium");
 	}
 		
 	@Override

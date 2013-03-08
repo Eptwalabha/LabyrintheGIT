@@ -30,7 +30,7 @@ public class AIEasyStrategy extends AIStrategy{
 
 	@Override
 	public void processSolutions() {
-		System.out.println("traitement des solutions en mode:\neasy");
+		
 	}
 
 	@Override

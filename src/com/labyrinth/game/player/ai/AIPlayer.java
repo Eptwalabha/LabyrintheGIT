@@ -7,12 +7,14 @@ import com.labyrinth.game.maze.Maze;
 import com.labyrinth.game.maze.Wall;
 import com.labyrinth.game.player.Player;
 import com.labyrinth.game.player.PlayerEventListener;
+import com.labyrinth.game.player.PlayerMovement;
 import com.labyrinth.game.player.WallMovement;
 import com.labyrinth.game.player.ai.strategy.AIEasyStrategy;
 import com.labyrinth.game.player.ai.strategy.AIHardStrategy;
 import com.labyrinth.game.player.ai.strategy.AIMediumStrategy;
 import com.labyrinth.game.player.ai.strategy.AIStrategy;
 import com.labyrinth.gui.SpriteGUI;
+import com.labyrinth.utils.graph.GraphVertex;
 
 public class AIPlayer extends Player implements Runnable{
 	
@@ -66,10 +68,11 @@ public class AIPlayer extends Player implements Runnable{
 		
 		this.playing_strategy.processSolutions();
 		
-		long time = System.currentTimeMillis();
+		long time;
 		long timet;
 		long next_timet = 1000;
 		
+		time = System.currentTimeMillis();
 		do{
 			timet = System.currentTimeMillis() - time;
 			
@@ -78,19 +81,48 @@ public class AIPlayer extends Player implements Runnable{
 				next_timet += 1000;
 			}
 			
-		}while(timet < 2000);
+		}while(timet < 1000);
 		
 		int id = this.getPlayerId();
 		int row, line, direction;
+		WallMovement wall_move;
 		
 		do{
 			row = (int) (Math.random() * this.maze.getNumberOfCollumn());
 			line = (int) (Math.random() * this.maze.getNumberOfLine());
 			direction = (int) (Math.random() * 4);
-			System.out.println("demande de déplacement de mur (random)");
-		}while(!this.listeners.get(0).playerWantsToPushWall(id, new WallMovement(row, line, direction)));
+			wall_move = new WallMovement(row, line, direction);
+			System.out.println("demande de  " + id + " pour déplacer un mur (random) (" + row + ", " + line + ", " + direction + ")");
+		}while(!this.listeners.get(0).playerWantsToPushWall(id, wall_move));
 		
-		this.playerHasFinishedHisRound();
+		this.maze.resetWeightGraph();
+		GraphVertex list = this.getPosition().getAllVerticesConnectedTo();
+		this.maze.resetWeightGraph();
+		
+		int list_size = list.countBrother();
+		
+		PlayerMovement player_move;
+		Wall wall_temp;
+		
+		time = System.currentTimeMillis();
+		do{
+			timet = System.currentTimeMillis() - time;
+			
+			if(timet >= next_timet){
+				System.out.print(timet / 1000 + ", ");
+				next_timet += 1000;
+			}
+			
+		}while(timet < 1000);
+		
+		do{
+			
+			wall_temp = (Wall) list.getBrother((int) (Math.random() * list_size)).getSon(); 
+			player_move = new PlayerMovement(wall_temp.getCoordinate2D());
+			System.out.println("demande de " + id + " pour se déplacer (random)");
+		}while(!this.listeners.get(0).playerWantsToMove(id, player_move));		
+//		
+//		this.playerHasFinishedHisRound();
 		
 	}
 
@@ -104,6 +136,5 @@ public class AIPlayer extends Player implements Runnable{
 	public int getTypeOfPlayer() {
 		return Player.AI;
 	}
-
 
 }
