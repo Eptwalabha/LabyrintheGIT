@@ -81,7 +81,7 @@ public class Maze {
 					int type = (int) (Math.random() * 2);
 					int orientation = (int) (Math.random() * 4);
 					
-//					type = Wall.TYPE_T;
+					type = Wall.TYPE_T;
 					
 					this.walls[i][j] = new Wall(type, i, j, orientation, i + "." + j, this.textures, true);
 				}

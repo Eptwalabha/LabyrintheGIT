@@ -29,8 +29,8 @@ public class AIPlayer extends Player implements Runnable{
 	private Maze maze;
 	private Maze maze_copy;
 	
-	public AIPlayer(int player_id, Origin origin, SpriteGUI textures, Wall start_position, PlayerEventListener listener, Maze maze, int ai_lvl) {
-		super(player_id, "cpu " + player_id, origin, textures, start_position, listener);
+	public AIPlayer(int player_id, String player_name, Origin origin, SpriteGUI textures, Wall start_position, PlayerEventListener listener, Maze maze, int ai_lvl) {
+		super(player_id, player_name, origin, textures, start_position, listener);
 		this.maze = maze;
 		this.maze_copy = this.maze.getCopyForAI();
 		this.ai_lvl = ai_lvl;
@@ -92,7 +92,7 @@ public class AIPlayer extends Player implements Runnable{
 			line = (int) (Math.random() * this.maze.getNumberOfLine());
 			direction = (int) (Math.random() * 4);
 			wall_move = new WallMovement(row, line, direction);
-			System.out.println("demande de  " + id + " pour déplacer un mur (random) (" + row + ", " + line + ", " + direction + ")");
+			System.out.println("demande de " + id + " pour déplacer un mur (random) (" + row + ", " + line + ", " + direction + ")");
 		}while(!this.listeners.get(0).playerWantsToPushWall(id, wall_move));
 		
 		this.maze.resetWeightGraph();

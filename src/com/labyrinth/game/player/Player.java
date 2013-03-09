@@ -19,6 +19,7 @@ public abstract class Player {
 	public final static int AI = 1;
 	public final static int ONLINE = 2;
 	
+	private boolean occupied = false;
 	
 	protected SpriteGUI textures;
 	protected List<PlayerEventListener> listeners;
@@ -55,6 +56,20 @@ public abstract class Player {
 	
 	public void setPlayerPosition(int position){
 		this.player_position = position;
+		switch (position) {
+		case 0:
+			this.player_color = Color.blue;
+			break;
+		case 1:
+			this.player_color = Color.red;
+			break;
+		case 2:
+			this.player_color = Color.yellow;
+			break;
+		default:
+			this.player_color = Color.green;
+			break;
+		}
 	}
 	
 	public int getPlayerPosition(){
@@ -69,6 +84,9 @@ public abstract class Player {
 		this.position = position;
 	}
 	
+	public Color getPlayerColor(){
+		return this.player_color;
+	}
 	
 	public Objective getPlayerObjective(){
 		if(this.objetive.size() > 0){
@@ -104,6 +122,7 @@ public abstract class Player {
 		
 		if(this.path != null){
 			this.position = (Wall) path.getBrother(this.path.countBrother() - 1).getSon();
+			this.path = null;
 		}
 		
 	}
@@ -149,6 +168,10 @@ public abstract class Player {
 		this.player_score++;
 	}
 	
+	public void yourPositionIsOccupied(boolean occupied){
+		this.occupied = occupied;
+	}
+	
 	public void render(GameContainer gc, Graphics g) {
 
 		if(this.objetive.size() > 0){
@@ -158,7 +181,31 @@ public abstract class Player {
 		int x = this.position.getPositionX();
 		int y = this.position.getPositionY();
 		
-		this.textures.getSpriteAt(0, this.player_position, this.origin.getWidth()).draw(x, y);
+		if(this.occupied){
+			
+			int qw = (int) (this.origin.getWidth() / 4.0f);
+			switch (this.player_position) {
+			case 0:
+				x -= qw;
+				y -= qw;
+				break;
+			case 1:
+				x += qw;
+				y -= qw;
+				break;
+			case 2:
+				x -= qw;
+				y += qw;
+				break;
+			default:
+				x += qw;
+				y += qw;
+				break;
+			}
+			this.textures.getSpriteAt(0, this.player_position, (int) (this.origin.getWidth() * 0.7f)).draw(x, y);
+		}else{
+			this.textures.getSpriteAt(0, this.player_position, this.origin.getWidth()).draw(x, y);
+		}
 	}
 	
 	public abstract int getTypeOfPlayer();

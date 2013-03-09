@@ -11,6 +11,7 @@ import com.labyrinth.game.player.PlayerMovement;
 import com.labyrinth.game.player.WallMovement;
 import com.labyrinth.game.player.ai.AIPlayer;
 import com.labyrinth.game.player.human.HumanPlayer;
+import com.labyrinth.game.player.online.OnlinePlayer;
 import com.labyrinth.gui.SpriteGUI;
 
 import java.awt.Font;
@@ -81,33 +82,19 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 		
 		this.input = arg0.getInput();
 		
-//		Player p1 = new HumanPlayer(this.generateUniqueId(), "Joueur Bleu", this.origin, player_texture, this.maze.getWall(0, 0), this);
-//		p1.setPlayerPosition(0);
-//		input.addMouseListener((MouseListener) p1);
-//		this.players.add(p1);
-//		
-//		Player p2 = new HumanPlayer(this.generateUniqueId(), "Joueur Rouge", this.origin, player_texture, this.maze.getWall(this.maze.getNumberOfCollumn() - 1, this.maze.getNumberOfLine() - 1), this);
-//		p2.setPlayerPosition(1);
-//		input.addMouseListener((MouseListener) p2);
-//		this.players.add(p2);
+		this.clearPlayerList();
 
-		Player p1 = new AIPlayer(this.generateUniqueId(), this.origin, player_texture, this.maze.getWall(0, 0), this, this.maze, AIPlayer.AI_HARD);
-		p1.setPlayerPosition(0);
-		this.players.add(p1);
+//		this.players.add(this.createPlayer(Player.AI, 0, player_texture, 0));
+//		this.players.add(this.createPlayer(Player.AI, 1, player_texture, 0));
+//		this.players.add(this.createPlayer(Player.AI, 2, player_texture, 0));
+//		this.players.add(this.createPlayer(Player.AI, 3, player_texture, 0));
 
-		Player p2 = new AIPlayer(this.generateUniqueId(), this.origin, player_texture, this.maze.getWall(this.maze.getNumberOfCollumn() - 1, this.maze.getNumberOfLine() - 1), this, this.maze, AIPlayer.AI_HARD);
-		p2.setPlayerPosition(1);
-		this.players.add(p2);
+		this.players.add(this.createPlayer(Player.HUMAN, 0, player_texture, 0));
+		this.players.add(this.createPlayer(Player.HUMAN, 1, player_texture, 0));
+		this.players.add(this.createPlayer(Player.HUMAN, 2, player_texture, 0));
+		this.players.add(this.createPlayer(Player.HUMAN, 3, player_texture, 0));
 
-		Player p3 = new AIPlayer(this.generateUniqueId(), this.origin, player_texture, this.maze.getWall(this.maze.getNumberOfCollumn() - 1, 0), this, this.maze, AIPlayer.AI_HARD);
-		p3.setPlayerPosition(2);
-		this.players.add(p3);
-
-		Player p4 = new AIPlayer(this.generateUniqueId(), this.origin, player_texture, this.maze.getWall(0, this.maze.getNumberOfLine() - 1), this, this.maze, AIPlayer.AI_HARD);
-		p4.setPlayerPosition(3);
-		this.players.add(p4);
-		
-		this.current_player = 2;
+		this.current_player = 0;
 		
 		int mx = this.maze.getNumberOfCollumn();
 		int my = this.maze.getNumberOfLine();
@@ -127,7 +114,7 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 				}while(wall_already_used);
 				Objective o = new Objective(w, objective_textures, p);
 				p.addObjective(o);
-				objectives.add(o);
+				this.objectives.add(o);
 			}
 		}
 		
@@ -136,7 +123,57 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 
 		Font f = new Font("Times new roman", Font.BOLD , 20);
 		this.ttf = new TrueTypeFont(f, true);
+		this.end_game = false;
 		
+	}
+	
+	private void clearPlayerList(){
+		this.players = new ArrayList<Player>();
+		this.objectives = new ArrayList<Objective>();
+	}
+	
+	private Player createPlayer(int player_type, int player_position, SpriteGUI texture, int ai_lvl){
+		
+		Player p = null;
+		String player_name = "Joueur ";
+		int id = this.generateUniqueId();
+		Wall player_start;
+		
+		switch (player_position) {
+		case 0:
+			player_name += "Bleu";
+			player_start = this.maze.getWall(0, 0);
+			break;
+		case 1:
+			player_name += "Rouge";
+			player_start = this.maze.getWall(this.maze.getNumberOfCollumn() - 1, 0);
+			break;
+		case 2:
+			player_name += "Jaune";
+			player_start = this.maze.getWall(0, this.maze.getNumberOfLine() - 1);
+			break;
+		default:
+			player_name += "Vert";
+			player_start = this.maze.getWall(this.maze.getNumberOfCollumn() - 1, this.maze.getNumberOfLine() - 1);
+			break;
+		}
+		
+		switch (player_type) {
+		case Player.HUMAN:
+			p = new HumanPlayer(id, player_name, this.origin, texture, player_start, this);
+			this.input.addMouseListener((MouseListener) p);
+			
+			break;
+		case Player.ONLINE:
+			p = new OnlinePlayer(id, player_name, this.origin, texture, player_start, this);
+		default:
+			p = new AIPlayer(id, player_name, this.origin, texture, player_start, this, this.maze, ai_lvl);
+			break;
+		}
+		
+		p.setPlayerPosition(player_position);
+		
+		return p;
 	}
 	
 	private int generateUniqueId(){
@@ -222,21 +259,38 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 			if(this.last_direction % 2 > 0 && line == this.last_line){
 				((CursorMoveWall) this.cursor_move_wall).setArrowEnable((this.last_direction + 2) % 4, false);
 			}
-			
-		}
-	
-//		System.out.println("dir = " + this.last_direction);
-//		if(this.last_direction == Maze.INSERT_FROM_BOTTOM || this.last_direction == Maze.INSERT_FROM_TOP){
-//			if(row == this.last_row){
-//				((CursorMoveWall) this.cursor_move_wall).setArrowEnable((this.last_direction + 2) % 2, false);
-//			}
-//		}else if(this.last_direction == Maze.INSERT_FROM_LEFT || this.last_direction == Maze.INSERT_FROM_RIGHT){
-//			if(line == this.last_line){
-//				((CursorMoveWall) this.cursor_move_wall).setArrowEnable(this.last_direction, false);
-//			}
-//		}
-		
+		}	
 	}
+	
+	private void checkIfPlayerCohabit() {
+		
+		Wall first = null;
+		Wall second = null;
+
+		for(int i = 0; i < this.players.size(); i++){
+			this.players.get(i).yourPositionIsOccupied(false);
+		}
+		
+		for(int i = 0; i < this.players.size(); i++){
+			
+			first = this.players.get(i).getPosition();
+			this.players.get(i).yourPositionIsOccupied(false);
+			
+			for(int j = 0; j < this.players.size(); j++){
+				
+				if(i != j){
+					second = this.players.get(j).getPosition();
+					
+					if(first == second){
+						this.players.get(i).yourPositionIsOccupied(true);
+						this.players.get(j).yourPositionIsOccupied(true);
+					}
+				}
+			}
+		}
+	}
+
+
 	
 	private boolean isALegalMove(int row, int line, int direction){
 		
@@ -271,14 +325,16 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 		this.ttf.drawString(25, 350, "Tab \nFaire pivoter le mur", Color.white);
 		int pos = 400;
 		for(Player j : players){
+			
 			String s = "Joueur " + (j.getPlayerPosition() + 1) + ": " + j.getPlayerScore() + " point(s)";
-			this.ttf.drawString(25, pos, s, Color.green);
+			this.ttf.drawString(25, pos, s, j.getPlayerColor());
 			pos += 25;
+			
 		}
 		
 		String explications = this.getExplanations();
 		
-		this.ttf.drawString(310, 10, explications, Color.red);
+		this.ttf.drawString(310, 10, explications, this.players.get(this.current_player).getPlayerColor());
 		
 
 	}
@@ -310,6 +366,8 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 	public void update(GameContainer arg0, StateBasedGame arg1, int arg2)
 			throws SlickException {
 		
+		
+		
 		if(!this.end_game){
 			this.origin.setBounds(300, 0,
 					arg0.getWidth() - 300, arg0.getHeight(),
@@ -335,6 +393,7 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 				p.update(arg0);
 				if(p.isMoving()){
 					p.move();
+					this.checkIfPlayerCohabit();
 					this.checkObjectives();
 				}
 			}
@@ -350,6 +409,8 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 			}
 	
 			if(in.isKeyPressed(Input.KEY_G)) this.printGraph();
+		}else{
+			this.init(arg0, arg1);
 		}
 	}
 	

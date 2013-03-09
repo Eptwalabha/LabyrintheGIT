@@ -30,11 +30,11 @@ public class SpriteGUI {
 //		System.out.println("ratio = " + this.ratio_width_height);
 		this.sprites = new SpriteSheet(image, image.getWidth() / nbr_column, image.getHeight() / nbr_line);
 		
-		this.setCenterOfRotation(axe_x, axe_y);
+		this.setCenterPivotPosition(axe_x, axe_y);
 		
 	}
 
-	public void setCenterOfRotation(int axe_x, int axe_y){
+	public void setCenterPivotPosition(int axe_x, int axe_y){
 		
 		this.pos_rot_x = this.calculCenterOfRotation((float) this.tile_width, axe_x);
 		this.pos_rot_y = this.calculCenterOfRotation((float) (this.tile_width * this.ratio_width_height), axe_y);
