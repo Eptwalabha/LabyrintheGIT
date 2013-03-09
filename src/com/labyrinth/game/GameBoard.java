@@ -78,29 +78,34 @@ public class GameBoard extends BasicGameState implements PlayerEventListener{
 		this.origin.setWidth(wall_texture.getTileWidth());
 		this.players = new ArrayList<Player>();		
 		
-		this.maze = new Maze(7, 7, this.origin, wall_texture);
+		this.maze = new Maze(9, 18, this.origin, wall_texture);
 		
 		this.input = arg0.getInput();
 		
 		this.clearPlayerList();
 
+		this.players.add(this.createPlayer(Player.HUMAN, 0, player_texture, 0));
+		this.players.add(this.createPlayer(Player.AI, 1, player_texture, 0));
+		
 //		this.players.add(this.createPlayer(Player.AI, 0, player_texture, 0));
 //		this.players.add(this.createPlayer(Player.AI, 1, player_texture, 0));
 //		this.players.add(this.createPlayer(Player.AI, 2, player_texture, 0));
 //		this.players.add(this.createPlayer(Player.AI, 3, player_texture, 0));
 
-		this.players.add(this.createPlayer(Player.HUMAN, 0, player_texture, 0));
-		this.players.add(this.createPlayer(Player.HUMAN, 1, player_texture, 0));
-		this.players.add(this.createPlayer(Player.HUMAN, 2, player_texture, 0));
-		this.players.add(this.createPlayer(Player.HUMAN, 3, player_texture, 0));
+//		this.players.add(this.createPlayer(Player.HUMAN, 0, player_texture, 0));
+//		this.players.add(this.createPlayer(Player.HUMAN, 1, player_texture, 0));
+//		this.players.add(this.createPlayer(Player.HUMAN, 2, player_texture, 0));
+//		this.players.add(this.createPlayer(Player.HUMAN, 3, player_texture, 0));
 
 		this.current_player = 0;
 		
 		int mx = this.maze.getNumberOfCollumn();
 		int my = this.maze.getNumberOfLine();
 		
+		int number_of_objective = this.maze.getNumberOfCollumn() * this.maze.getNumberOfLine() / 8 ;
+		
 		for(Player p: this.players){
-			for(int i = 0; i < 5; i++){
+			for(int i = 0; i < number_of_objective; i++){
 				Wall w;
 				boolean wall_already_used;
 				

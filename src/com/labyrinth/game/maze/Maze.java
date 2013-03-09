@@ -219,15 +219,15 @@ public class Maze {
 							this.walls[row][i].setCoordinates(row, i);
 						}
 					}else{
-						if(nbr_of_line - 1 - i > 0){
-							this.walls[row][nbr_of_line - 1 - i] = this.walls[row][nbr_of_line - 2 - i];
-							this.walls[row][nbr_of_line - 1 - i].setCoordinates(row, nbr_of_line - 1 - i);
+						if(this.nbr_of_line - 1 - i > 0){
+							this.walls[row][this.nbr_of_line - 1 - i] = this.walls[row][this.nbr_of_line - 2 - i];
+							this.walls[row][this.nbr_of_line - 1 - i].setCoordinates(row, this.nbr_of_line - 1 - i);
 						}
 					}
 				}
 				if(direction == INSERT_FROM_BOTTOM){
 					this.walls[row][this.nbr_of_line - 1] = this.additional_wall;
-					this.walls[row][nbr_of_line - 1].setCoordinates(row, nbr_of_line - 1);
+					this.walls[row][this.nbr_of_line - 1].setCoordinates(row, this.nbr_of_line - 1);
 				}else{
 					this.walls[row][0] = this.additional_wall;
 					this.walls[row][0].setCoordinates(row, 0);
@@ -248,15 +248,15 @@ public class Maze {
 							this.walls[i][line].setCoordinates(i, line);
 						}
 					}else{
-						if(nbr_of_row - 1 - i > 0){
-							this.walls[nbr_of_row - 1 - i][line] = this.walls[nbr_of_row - 2 - i][line];
-							this.walls[nbr_of_row - 1 - i][line].setCoordinates(nbr_of_row - 1 - i, line);
+						if(this.nbr_of_row - 1 - i > 0){
+							this.walls[this.nbr_of_row - 1 - i][line] = this.walls[this.nbr_of_row - 2 - i][line];
+							this.walls[this.nbr_of_row - 1 - i][line].setCoordinates(this.nbr_of_row - 1 - i, line);
 						}
 					}
 				}
 				if(direction == INSERT_FROM_RIGHT){
-					this.walls[this.nbr_of_line - 1][line] = this.additional_wall;
-					this.walls[this.nbr_of_line - 1][line].setCoordinates(this.nbr_of_line - 1, line);
+					this.walls[this.nbr_of_row - 1][line] = this.additional_wall;
+					this.walls[this.nbr_of_row - 1][line].setCoordinates(this.nbr_of_line - 1, line);
 				}else{
 					this.walls[0][line] = this.additional_wall;
 					this.walls[0][line].setCoordinates(0, line);
@@ -271,7 +271,7 @@ public class Maze {
 		
 		this.graphCreation();
 		
-		this.additional_wall.setCoordinates(nbr_of_row, 0);
+		this.additional_wall.setCoordinates(this.nbr_of_row, 0);
 	}
 
 	public Wall getWall(int x, int y){
